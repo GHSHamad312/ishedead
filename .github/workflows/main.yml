@@ -1,0 +1,24 @@
+name: Build iOS IPA
+on: [push]
+jobs:
+  build-ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+      
+      - name: Build IPA (No Signing)
+        run: |
+          flutter build ios --release --no-codesign
+          cd build/ios/iphoneos
+          mkdir Payload
+          cp -r Runner.app Payload/
+          zip -r Runner.ipa Payload
+          
+      - name: Upload IPA
+        uses: actions/upload-artifact@v3
+        with:
+          name: flutter-ios-app
+          path: build/ios/iphoneos/Runner.ipa
