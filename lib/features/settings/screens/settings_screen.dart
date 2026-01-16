@@ -6,7 +6,6 @@ import 'package:is_he_dead/core/providers/theme_provider.dart';
 import 'package:is_he_dead/features/auth/auth_provider.dart';
 import 'package:is_he_dead/features/profile/services/profile_service.dart';
 import 'package:is_he_dead/core/services/notification_service.dart';
-import '../../../core/services/biometric_service.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -16,23 +15,9 @@ class SettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-  bool _biometricEnabled = false;
-
   @override
   void initState() {
     super.initState();
-    _loadBiometricStatus();
-  }
-
-  Future<void> _loadBiometricStatus() async {
-    final enabled = await ref
-        .read(biometricServiceProvider)
-        .isBiometricEnabled();
-    if (mounted) {
-      setState(() {
-        _biometricEnabled = enabled;
-      });
-    }
   }
 
   @override
@@ -44,11 +29,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverAppBar.large(title: const Text("Settings"), centerTitle: false),
+          SliverAppBar.large(
+            title: const Text("Settings"),
+            centerTitle: false,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            surfaceTintColor: Colors.transparent, // Fixes off-white tint
+          ),
           SliverToBoxAdapter(
             child: userProfileAsync.when(
               data: (profile) {
-                final isSafetyMode = profile?.isSafetyModeEnabled ?? false;
                 return Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -61,7 +50,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             icon: Icons.person_outline_rounded,
                             title: user?.email ?? "User Profile",
                             subtitle: "Manage details & contacts",
-                            onTap: () => context.go('/profile'),
+                            onTap: () => context.push('/account-settings'),
                             showArrow: true,
                           ),
                           _SettingsTile(
@@ -78,40 +67,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       _SectionHeader(title: "Monitoring & Safety"),
                       _SettingsGroup(
                         children: [
-                          _SettingsSwitchTile(
-                            icon: isSafetyMode
-                                ? Icons.pause_circle_outline_rounded
-                                : Icons.shield_outlined,
-                            title: "Safety Mode",
-                            subtitle: isSafetyMode
-                                ? "Monitoring Paused"
-                                : "System Active",
-                            activeColor: Colors.amber,
-                            iconColor: isSafetyMode
-                                ? Colors.amber
-                                : Colors.green,
-                            value: isSafetyMode,
-                            onChanged: (val) async {
-                              if (user != null) {
-                                await ref
-                                    .read(profileServiceProvider)
-                                    .toggleSafetyMode(user.uid, val);
-                                final notifs = ref.read(
-                                  notificationServiceProvider,
-                                );
-                                if (val) {
-                                  await notifs.cancelAllNotifications();
-                                } else {
-                                  await notifs.scheduleDailyCheckInReminder();
-                                }
-                              }
-                            },
+                          _SettingsTile(
+                            icon: Icons.priority_high_rounded,
+                            title: "Trigger Protocol Now",
+                            subtitle: "Immediate Emergency Alert",
+                            iconColor: Colors.redAccent,
+                            textColor: Colors.redAccent,
+                            onTap: () =>
+                                _showPanicConfirmation(context, user?.uid),
                           ),
                           _SettingsTile(
                             icon: Icons.timer_outlined,
                             title: "Check-in Frequency",
                             subtitle:
-                                "Every ${profile?.checkInFrequency ?? 24} Hours",
+                                "Every ${(profile?.checkInFrequency ?? 24) ~/ 24} Days",
                             onTap: () => _showCheckInFrequencyDialog(
                               context,
                               profile?.checkInFrequency ?? 24,
@@ -142,13 +111,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                     val ? ThemeMode.dark : ThemeMode.light,
                                   );
                             },
-                          ),
-                          _SettingsSwitchTile(
-                            icon: Icons.fingerprint,
-                            title: "Biometric Lock",
-                            subtitle: "Require FaceID/TouchID",
-                            value: _biometricEnabled,
-                            onChanged: (val) => _toggleBiometric(val),
                           ),
                         ],
                       ),
@@ -273,7 +235,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       }
 
       final functions = FirebaseFunctions.instance;
-      final result = await functions.httpsCallable('triggerTestAlert').call({
+      final result = await functions.httpsCallable('debugAlert').call({
         'type': type,
       });
 
@@ -313,110 +275,275 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  Future<void> _toggleBiometric(bool val) async {
-    final bioService = ref.read(biometricServiceProvider);
-    final available = await bioService.isBiometricAvailable();
+  void _showCheckInFrequencyDialog(BuildContext context, int currentFreqHours) {
+    // Convert hours to days (default minimum 1 day)
+    int selectedDays = (currentFreqHours / 24).round();
+    if (selectedDays < 1) selectedDays = 1;
 
-    if (!available) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Biometrics not available on this device."),
-          ),
-        );
-      }
-      return;
-    }
-
-    if (val) {
-      final success = await bioService.authenticate();
-      if (!success) return;
-    }
-
-    await bioService.setBiometricEnabled(val);
-    setState(() {
-      _biometricEnabled = val;
-    });
-  }
-
-  void _showCheckInFrequencyDialog(BuildContext context, int currentFreq) {
-    int selectedFreq = currentFreq;
     showDialog(
       context: context,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
-            return AlertDialog(
-              title: const Text("Check-in Frequency"),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    "Every $selectedFreq hours",
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.deepPurple,
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFF2C2C2C)
+                      : Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  Slider(
-                    value: selectedFreq.toDouble(),
-                    min: 12,
-                    max: 72,
-                    divisions: 5, // 12, 24, 36, 48, 60, 72
-                    label: "$selectedFreq h",
-                    activeColor: Colors.deepPurple,
-                    onChanged: (val) {
-                      setDialogState(() {
-                        selectedFreq = val.round();
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    "How often must you verify you are okay?",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                ],
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Icon Header
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.deepPurple.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.timer_outlined,
+                        color: Colors.deepPurple,
+                        size: 32,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      "Check-in Frequency",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Set the maximum time between safety verifications.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Theme.of(context).hintColor,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Main Value Display
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.deepPurple,
+                        borderRadius: BorderRadius.circular(50),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.deepPurple.withOpacity(0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        "Every $selectedDays Day${selectedDays > 1 ? 's' : ''}",
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Slider Section
+                    Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "1 Day",
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey.shade400,
+                              ),
+                            ),
+                            Text(
+                              "7 Days",
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey.shade400,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SliderTheme(
+                          data: SliderTheme.of(context).copyWith(
+                            activeTrackColor: Colors.deepPurple,
+                            inactiveTrackColor: Colors.deepPurple.withOpacity(
+                              0.1,
+                            ),
+                            trackHeight: 8,
+                            thumbColor: Colors.white,
+                            thumbShape: const RoundSliderThumbShape(
+                              enabledThumbRadius: 12,
+                              elevation: 4,
+                            ),
+                            overlayColor: Colors.deepPurple.withOpacity(0.1),
+                          ),
+                          child: Slider(
+                            value: selectedDays.toDouble().clamp(1.0, 7.0),
+                            min: 1,
+                            max: 7,
+                            divisions: 6,
+                            onChanged: (val) {
+                              setDialogState(() {
+                                selectedDays = val.round();
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Action Buttons
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text("Cancel"),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              Navigator.pop(context);
+                              final user = ref
+                                  .read(authServiceProvider)
+                                  .currentUser;
+                              if (user != null) {
+                                final hours = selectedDays * 24;
+                                await ref
+                                    .read(profileServiceProvider)
+                                    .updateCheckInFrequency(user.uid, hours);
+
+                                await ref
+                                    .read(notificationServiceProvider)
+                                    .scheduleOverdueNotification(
+                                      Duration(hours: hours),
+                                    );
+
+                                await ref
+                                    .read(notificationServiceProvider)
+                                    .schedulePreDueNotification(
+                                      Duration(hours: hours),
+                                    );
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.deepPurple,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text("Save Changes"),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text("Cancel"),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    Navigator.pop(context);
-                    final user = ref.read(authServiceProvider).currentUser;
-                    if (user != null) {
-                      await ref
-                          .read(profileServiceProvider)
-                          .updateCheckInFrequency(user.uid, selectedFreq);
-
-                      // Reschedule with new frequency
-                      await ref
-                          .read(notificationServiceProvider)
-                          .scheduleOverdueNotification(
-                            Duration(hours: selectedFreq),
-                          );
-
-                      await ref
-                          .read(notificationServiceProvider)
-                          .schedulePreDueNotification(
-                            Duration(hours: selectedFreq),
-                          );
-                    }
-                  },
-                  child: const Text("Save"),
-                ),
-              ],
             );
           },
         );
       },
     );
+  }
+
+  Future<void> _showPanicConfirmation(BuildContext context, String? uid) async {
+    if (uid == null) return;
+
+    // Capture context before async gap
+    final parentContext = context;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text(
+          "TRIGGER EMERGENCY?",
+          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          "This will IMMEDIATELY mark you as inactive and begin contacting your trusted contacts. This action cannot be undone easily.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("CANCEL"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text("I AM IN DANGER"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && parentContext.mounted) {
+      // Invoke Cloud Function or Service to trigger protocol
+      try {
+        final functions = FirebaseFunctions.instance;
+        await functions.httpsCallable('debugAlert').call({
+          'type': 'panic',
+          'uid': uid,
+        });
+
+        if (parentContext.mounted) {
+          ScaffoldMessenger.of(parentContext).showSnackBar(
+            const SnackBar(
+              content: Text("Protocol Initiated. Alerts sent."),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } catch (e) {
+        if (parentContext.mounted) {
+          ScaffoldMessenger.of(
+            parentContext,
+          ).showSnackBar(SnackBar(content: Text("Failed to trigger: $e")));
+        }
+      }
+    }
   }
 }
 
@@ -559,20 +686,16 @@ class _SettingsTile extends StatelessWidget {
 class _SettingsSwitchTile extends StatelessWidget {
   final IconData icon;
   final String title;
-  final String? subtitle;
   final bool value;
   final ValueChanged<bool> onChanged;
   final Color? activeColor;
-  final Color? iconColor;
 
   const _SettingsSwitchTile({
     required this.icon,
     required this.title,
-    this.subtitle,
     required this.value,
     required this.onChanged,
     this.activeColor,
-    this.iconColor,
   });
 
   @override
@@ -580,12 +703,8 @@ class _SettingsSwitchTile extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final tileIconColor =
-        iconColor ?? (isDark ? Colors.white : theme.primaryColor);
+    final tileIconColor = isDark ? Colors.white : theme.primaryColor;
     final tileTextColor = isDark ? Colors.white : Colors.black87;
-    final tileSubtitleColor = isDark
-        ? Colors.grey.shade400
-        : Colors.grey.shade600;
 
     return SwitchListTile.adaptive(
       secondary: Container(
@@ -604,12 +723,6 @@ class _SettingsSwitchTile extends StatelessWidget {
           fontSize: 15,
         ),
       ),
-      subtitle: subtitle != null
-          ? Text(
-              subtitle!,
-              style: TextStyle(fontSize: 13, color: tileSubtitleColor),
-            )
-          : null,
       value: value,
       onChanged: onChanged,
       activeColor: activeColor ?? theme.primaryColor,

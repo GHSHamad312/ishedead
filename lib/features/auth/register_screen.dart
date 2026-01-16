@@ -50,7 +50,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           fullName: _nameController.text.trim(),
           phone: _fullPhoneNumber,
           lastCheckIn: DateTime.now(),
-          registrationPaid: false,
           status: 'Active',
         );
         await ref.read(profileServiceProvider).createUserProfile(newProfile);

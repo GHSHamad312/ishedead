@@ -8,12 +8,14 @@ class EmergencyContact {
   final bool accessVault;
   final bool accessLegacyMessage;
   final bool accessMedicalInfo;
+  final String? countryIso;
 
   EmergencyContact({
     required this.id,
     required this.name,
     required this.email,
     required this.phone,
+    this.countryIso,
     this.relationship = 'Friend',
     required this.priority,
     this.accessVault = false,
@@ -27,6 +29,7 @@ class EmergencyContact {
       name: data['name'] ?? '',
       email: data['email'] ?? '',
       phone: data['phone'] ?? '',
+      countryIso: data['countryIso'],
       relationship: data['relationship'] ?? 'Friend',
       priority: data['priority'] ?? 1,
       accessVault: data['accessVault'] ?? false,
@@ -41,6 +44,7 @@ class EmergencyContact {
       'name': name,
       'email': email,
       'phone': phone,
+      'countryIso': countryIso,
       'relationship': relationship,
       'priority': priority,
       'accessVault': accessVault,

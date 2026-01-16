@@ -21,9 +21,9 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
   late TextEditingController _emailController;
   // Phone handled by GlassPhoneField state
   late TextEditingController _relationshipController;
-  late TextEditingController _priorityController;
 
   String _fullPhoneNumber = '';
+  String _countryIso = 'US';
 
   // Access Control States
   bool _accessVault = false;
@@ -38,11 +38,9 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
     _nameController = TextEditingController(text: widget.contact?.name ?? '');
     _emailController = TextEditingController(text: widget.contact?.email ?? '');
     _fullPhoneNumber = widget.contact?.phone ?? '';
+    _countryIso = widget.contact?.countryIso ?? 'US';
     _relationshipController = TextEditingController(
       text: widget.contact?.relationship ?? 'Friend',
-    );
-    _priorityController = TextEditingController(
-      text: widget.contact?.priority.toString() ?? '1',
     );
 
     // Initialize Access Controls
@@ -59,7 +57,6 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
     _emailController.dispose();
     // _phoneController handled locally
     _relationshipController.dispose();
-    _priorityController.dispose();
     super.dispose();
   }
 
@@ -77,8 +74,9 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
             name: _nameController.text.trim(),
             email: _emailController.text.trim(),
             phone: _fullPhoneNumber,
+            countryIso: _countryIso,
             relationship: _relationshipController.text.trim(),
-            priority: int.tryParse(_priorityController.text) ?? 1,
+            priority: 1, // Default priority since UI is removed
             accessVault: _accessVault,
             accessLegacyMessage: _accessLegacyMessage,
             accessMedicalInfo: _accessMedicalInfo,
@@ -93,7 +91,11 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
                 .read(profileServiceProvider)
                 .updateContact(user.uid, newContact);
           }
-          if (mounted) context.pop();
+
+          if (mounted) {
+            // Always pop if in setup mode OR if strictly desired behavior
+            context.pop();
+          }
         }
       } catch (e) {
         if (mounted) {
@@ -217,22 +219,15 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
                     GlassPhoneField(
                       label: 'Phone Number',
                       initialValue: _fullPhoneNumber,
+                      initialCountryCode: _countryIso,
                       isDark: isDark,
                       fillColor: isDark ? Colors.grey[900] : Colors.grey[50],
                       onChanged: (phone) {
                         _fullPhoneNumber = phone.completeNumber;
+                        _countryIso = phone.countryISOCode;
                       },
                     ),
                     const SizedBox(height: 20),
-                    _buildTextField(
-                      controller: _priorityController,
-                      label: 'Priority Order',
-                      icon: Icons.format_list_numbered,
-                      keyboardType: TextInputType.number,
-                      hint: '1 = First to verify',
-                      isDark: isDark,
-                      textColor: textColor,
-                    ),
                   ],
                 ),
               ),

@@ -4,57 +4,56 @@ import 'package:is_he_dead/features/medical/models/medical_info.dart';
 class UserProfile {
   final String uid;
   final String email;
-  final String? fullName; // Added
-  final String? phone; // Added
+  final String? fullName;
+  final String? phone;
   final DateTime lastCheckIn;
-  final bool registrationPaid;
   final String status;
   final String? willUrl;
-  final String? medicalNotes; // Keeping for legacy, prefer medicalInfo.notes
-  final MedicalInfo? medicalInfo; // Added structured data
-  final Map<String, dynamic>? travelPlans;
-  final bool isSafetyModeEnabled;
+  final String? medicalNotes;
+  final MedicalInfo? medicalInfo;
   final bool isSetupComplete;
-  final int checkInFrequency; // (hours)
-  final String? legacyMessage; // Added
+  final int checkInFrequency; // In hours
+  final bool voiceAuthEnabled;
+  final Map<String, dynamic>? travelPlans;
+  final String? legacyMessage;
 
-  UserProfile({
+  const UserProfile({
     required this.uid,
     required this.email,
     this.fullName,
     this.phone,
     required this.lastCheckIn,
-    required this.registrationPaid,
-    required this.status,
+    this.status = 'Active',
+    this.voiceAuthEnabled = false,
+    this.isSetupComplete = false,
     this.willUrl,
     this.medicalNotes,
     this.medicalInfo,
     this.travelPlans,
-    this.isSafetyModeEnabled = false,
-    this.isSetupComplete = false,
     this.checkInFrequency = 24,
     this.legacyMessage,
   });
 
-  factory UserProfile.fromMap(Map<String, dynamic> data, String uid) {
+  factory UserProfile.fromMap(Map<String, dynamic> map, String uid) {
     return UserProfile(
       uid: uid,
-      email: data['email'] ?? '',
-      fullName: data['full_name'],
-      phone: data['phone'],
-      lastCheckIn: (data['last_check_in'] as Timestamp).toDate(),
-      registrationPaid: data['registration_paid'] ?? false,
-      status: data['status'] ?? 'Active',
-      willUrl: data['will_url'],
-      medicalNotes: data['medical_notes'],
-      medicalInfo: data['medical_id'] != null
-          ? MedicalInfo.fromMap(data['medical_id'])
+      email: map['email'] as String? ?? '',
+      fullName: map['full_name'] as String?,
+      phone: map['phone'] as String?,
+      lastCheckIn: map['last_check_in'] != null
+          ? (map['last_check_in'] as Timestamp).toDate()
+          : DateTime.now(),
+      status: map['status'] as String? ?? 'Active',
+      voiceAuthEnabled: map['voice_auth_enabled'] as bool? ?? false,
+      isSetupComplete: map['is_setup_complete'] as bool? ?? false,
+      willUrl: map['will_url'] as String?,
+      medicalNotes: map['medical_notes'] as String?,
+      medicalInfo: map['medical_info'] != null
+          ? MedicalInfo.fromMap(map['medical_info'] as Map<String, dynamic>)
           : null,
-      travelPlans: data['travel_plans'],
-      isSafetyModeEnabled: data['is_safety_mode_enabled'] ?? false,
-      isSetupComplete: data['is_setup_complete'] ?? false,
-      checkInFrequency: data['check_in_frequency'] ?? 24,
-      legacyMessage: data['legacy_message'],
+      travelPlans: map['travel_plans'] as Map<String, dynamic>?,
+      checkInFrequency: map['check_in_frequency'] as int? ?? 24,
+      legacyMessage: map['legacy_message'] as String?,
     );
   }
 
@@ -64,14 +63,13 @@ class UserProfile {
       'full_name': fullName,
       'phone': phone,
       'last_check_in': Timestamp.fromDate(lastCheckIn),
-      'registration_paid': registrationPaid,
       'status': status,
+      'voice_auth_enabled': voiceAuthEnabled,
+      'is_setup_complete': isSetupComplete,
       'will_url': willUrl,
       'medical_notes': medicalNotes,
-      'medical_id': medicalInfo?.toMap(),
+      'medical_info': medicalInfo?.toMap(),
       'travel_plans': travelPlans,
-      'is_safety_mode_enabled': isSafetyModeEnabled,
-      'is_setup_complete': isSetupComplete,
       'check_in_frequency': checkInFrequency,
       'legacy_message': legacyMessage,
     };

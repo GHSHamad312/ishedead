@@ -1,33 +1,56 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
+import 'package:is_he_dead/core/services/notification_service.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:is_he_dead/core/providers/theme_provider.dart';
-import 'package:is_he_dead/core/router/router_provider.dart';
 import 'package:is_he_dead/core/providers/onboarding_provider.dart';
-import 'package:is_he_dead/features/security/screens/biometric_lock_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'core/router/router_provider.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  usePathUrlStrategy(); // Uses path-based URLs on web
 
-  bool seenOnboarding = false;
-  try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    final prefs = await SharedPreferences.getInstance();
-    seenOnboarding = prefs.getBool('seen_onboarding') ?? false;
-  } catch (e) {
-    debugPrint("Initialization failed: $e");
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  final container = ProviderContainer();
+
+  // Initialize Services
+  container.read(notificationServiceProvider).init();
+
+  // Load Onboarding State
+  final prefs = await SharedPreferences.getInstance();
+  final seenOnboarding = prefs.getBool('seen_onboarding') ?? false;
+  container.read(onboardingProvider.notifier).state = seenOnboarding;
+
+  if (kDebugMode) {
+    try {
+      // Connect to auth emulator
+      await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
+
+      // Connect to firestore emulator
+      FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8090);
+
+      // Connect to storage emulator
+      FirebaseStorage.instance.useStorageEmulator('localhost', 9199);
+
+      // Connect to functions emulator
+      FirebaseFunctions.instance.useFunctionsEmulator('localhost', 5001);
+
+      print('Connected to Firebase Emulators');
+    } catch (e) {
+      print('Error connecting to emulators: $e');
+    }
   }
 
-  runApp(
-    ProviderScope(
-      overrides: [onboardingProvider.overrideWith((ref) => seenOnboarding)],
-      child: const MyApp(),
-    ),
-  );
+  runApp(UncontrolledProviderScope(container: container, child: const MyApp()));
 }
 
 class MyApp extends ConsumerWidget {
@@ -35,44 +58,24 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
     final themeMode = ref.watch(themeProvider);
-    final router = ref.read(routerProvider);
 
     return MaterialApp.router(
-      title: 'Is He Dead?',
+      title: 'Is He Dead',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-          brightness: Brightness.light,
-          surface: Colors.white,
-          surfaceContainer: Colors.grey[50],
-        ),
-        scaffoldBackgroundColor: Colors.grey[50],
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.transparent,
-          surfaceTintColor: Colors.transparent,
-        ),
+        scaffoldBackgroundColor: Colors.white,
       ),
-      darkTheme: ThemeData(
+      darkTheme: ThemeData.dark().copyWith(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.deepPurple,
           brightness: Brightness.dark,
-          surface: const Color(0xFF1E1E1E),
         ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.black,
-          foregroundColor: Colors.white,
-          surfaceTintColor: Colors.transparent,
-        ),
-        scaffoldBackgroundColor: Colors.black,
-        useMaterial3: true,
       ),
       themeMode: themeMode,
       routerConfig: router,
-      builder: (context, child) {
-        return BiometricLockScreen(child: child!);
-      },
     );
   }
 }

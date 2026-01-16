@@ -48,18 +48,18 @@ class ProfileService {
 
   // New Structured Medical Info
   Future<void> updateMedicalInfo(String uid, MedicalInfo info) async {
-    // For now, saving as a map field 'medical_id'
+    // For now, saving as a map field 'medical_info'
     // in a real app, might be a subcollection if it grows large
     await _firestore.collection('users').doc(uid).update({
-      'medical_id': info.toMap(),
+      'medical_info': info.toMap(),
     });
   }
 
   Future<MedicalInfo?> getMedicalInfo(String uid) async {
     final doc = await _firestore.collection('users').doc(uid).get();
-    if (doc.exists && doc.data()!.containsKey('medical_id')) {
+    if (doc.exists && doc.data()!.containsKey('medical_info')) {
       return MedicalInfo.fromMap(
-        doc.data()!['medical_id'] as Map<String, dynamic>,
+        doc.data()!['medical_info'] as Map<String, dynamic>,
       );
     }
     return null;
@@ -78,6 +78,8 @@ class ProfileService {
   Future<void> updateLastCheckIn(String uid) async {
     await _firestore.collection('users').doc(uid).update({
       'last_check_in': FieldValue.serverTimestamp(),
+      'last_alert_tier': 0, // Reset alert cycle
+      'last_alert_time': null, // Clear last alert time
     });
   }
 
@@ -87,16 +89,14 @@ class ProfileService {
     });
   }
 
-  Future<void> toggleSafetyMode(String uid, bool isEnabled) async {
-    await _firestore.collection('users').doc(uid).update({
-      'is_safety_mode_enabled': isEnabled,
-    });
-  }
-
   Future<void> completeSetup(String uid) async {
     await _firestore.collection('users').doc(uid).update({
       'is_setup_complete': true,
     });
+  }
+
+  Future<void> updateUserProfile(String uid, Map<String, dynamic> data) async {
+    await _firestore.collection('users').doc(uid).update(data);
   }
 
   // Emergency Contacts

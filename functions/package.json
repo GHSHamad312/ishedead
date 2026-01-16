@@ -14,10 +14,11 @@
     },
     "main": "index.js",
     "dependencies": {
+        "@sendgrid/mail": "^7.7.0",
         "firebase-admin": "^11.8.0",
         "firebase-functions": "^4.3.1",
         "moment": "^2.29.4",
-        "@sendgrid/mail": "^7.7.0",
+        "nodemailer": "^7.0.12",
         "twilio": "^4.19.0"
     },
     "devDependencies": {

@@ -1,0 +1,12 @@
+{
+    "nodemailer": {
+        "service": "gmail",
+        "email": "ghsbinance@gmail.com",
+        "password": "mqrq ncmj wgwg pldm"
+    },
+    "twilio": {
+        "sid": "ACee35003cd18ab79cc6c769ba2f6ed560",
+        "token": "e302949c059a529f0a8c701879b40f4b",
+        "from": "+19285881394"
+    }
+}

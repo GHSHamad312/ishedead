@@ -52,7 +52,6 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
           fullName: _nameController.text.trim(),
           phone: _fullPhoneNumber,
           lastCheckIn: DateTime.now(),
-          registrationPaid: false,
           status: 'Active',
           isSetupComplete: false,
         );
@@ -264,8 +263,12 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
     if (profile.willUrl != null && profile.willUrl!.isNotEmpty)
       completedTasks++;
 
-    // Total steps: 3 (Medical, Contacts, Vault)
-    double progress = completedTasks / 3.0;
+    // 4. Legacy Message
+    if (profile.legacyMessage != null && profile.legacyMessage!.isNotEmpty)
+      completedTasks++;
+
+    // Total steps: 4 (Medical, Contacts, Vault, Legacy)
+    double progress = completedTasks / 4.0;
     if (progress == 0) progress = 0.05; // Visual placeholder
 
     return Scaffold(
@@ -323,6 +326,7 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
                           color: VaultStyles.textColor(isDark),
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
+                          height: 1.2,
                         ),
                       ),
                     ],
@@ -383,6 +387,20 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
                             profile.willUrl != null &&
                             profile.willUrl!.isNotEmpty,
                         onTap: () => context.push('/upload-doc'),
+                      ),
+
+                      _buildGlassTaskTile(
+                        context: context,
+                        isDark: isDark,
+                        stepIndex: 4,
+                        title: "Legacy Message",
+                        subtitle: "A final message for your loved ones",
+                        icon: Icons.mark_email_unread_rounded,
+                        color: Colors.purpleAccent,
+                        isComplete:
+                            profile.legacyMessage != null &&
+                            profile.legacyMessage!.isNotEmpty,
+                        onTap: () => context.push('/legacy-message'),
                       ),
 
                       const SizedBox(height: 40),

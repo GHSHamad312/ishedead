@@ -30,13 +30,32 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     return Scaffold(
       backgroundColor: backgroundColor,
+      appBar: widget.isSetupMode
+          ? AppBar(
+              title: Text(
+                "Trusted Contacts",
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black87,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              centerTitle: true,
+              backgroundColor: backgroundColor,
+              elevation: 0,
+              leading: IconButton(
+                icon: Icon(
+                  Icons.arrow_back,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+                onPressed: () => context.pop(),
+              ),
+            )
+          : null,
       body: userProfileAsync.when(
         data: (profile) {
           if (profile == null) {
             return const Center(child: Text("Profile Loading..."));
           }
-          final isSafetyMode = profile.isSafetyModeEnabled;
-
           return SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(
@@ -50,7 +69,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   _buildProfileHeader(
                     user?.email,
                     profile.fullName,
-                    isSafetyMode,
                     isDark,
                     surfaceColor,
                   ),
@@ -109,7 +127,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget _buildProfileHeader(
     String? email,
     String? name,
-    bool isSafetyMode,
     bool isDark,
     Color surfaceColor,
   ) {
@@ -134,14 +151,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(
-                color: isSafetyMode ? Colors.amber : Colors.greenAccent,
-                width: 3,
-              ),
+              border: Border.all(color: Colors.greenAccent, width: 3),
               boxShadow: [
                 BoxShadow(
-                  color: (isSafetyMode ? Colors.amber : Colors.greenAccent)
-                      .withOpacity(0.2),
+                  color: Colors.greenAccent.withOpacity(0.2),
                   blurRadius: 20,
                   spreadRadius: 2,
                 ),
@@ -177,9 +190,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
             decoration: BoxDecoration(
-              color: (isSafetyMode ? Colors.amber : Colors.green).withOpacity(
-                0.1,
-              ),
+              color: Colors.green.withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
@@ -188,18 +199,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 Container(
                   width: 8,
                   height: 8,
-                  decoration: BoxDecoration(
-                    color: isSafetyMode ? Colors.amber : Colors.green,
+                  decoration: const BoxDecoration(
+                    color: Colors.green,
                     shape: BoxShape.circle,
                   ),
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  isSafetyMode ? "MONITORING PAUSED" : "ACTIVE & PROTECTED",
+                const Text(
+                  "ACTIVE & PROTECTED",
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: isSafetyMode ? Colors.amber : Colors.green,
+                    color: Colors.green,
                     letterSpacing: 0.5,
                   ),
                 ),

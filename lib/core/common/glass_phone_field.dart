@@ -11,6 +11,8 @@ class GlassPhoneField extends StatelessWidget {
   final bool isDark;
   final Color? fillColor;
   final TextEditingController? controller;
+  final bool showLabel;
+  final bool enabled;
 
   const GlassPhoneField({
     super.key,
@@ -21,6 +23,8 @@ class GlassPhoneField extends StatelessWidget {
     this.initialValue,
     this.fillColor,
     this.controller,
+    this.showLabel = true,
+    this.enabled = true,
   });
 
   @override
@@ -28,15 +32,17 @@ class GlassPhoneField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: VaultStyles.subTextColor(isDark),
-            fontWeight: FontWeight.w500,
-            fontSize: 14,
+        if (showLabel) ...[
+          Text(
+            label,
+            style: TextStyle(
+              color: VaultStyles.subTextColor(isDark),
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
+          const SizedBox(height: 8),
+        ],
         Theme(
           data: Theme.of(context).copyWith(
             canvasColor: isDark
@@ -45,6 +51,7 @@ class GlassPhoneField extends StatelessWidget {
           ),
           child: IntlPhoneField(
             controller: controller,
+            enabled: enabled,
             initialCountryCode: initialCountryCode,
             initialValue: initialValue,
             style: TextStyle(

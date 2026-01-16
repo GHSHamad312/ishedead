@@ -48,7 +48,6 @@ class _HomePageState extends ConsumerState<HomePage>
   Widget build(BuildContext context) {
     final user = ref.read(authServiceProvider).currentUser;
     final userProfileAsync = ref.watch(userProfileProvider);
-    final isSafetyMode = userProfileAsync.value?.isSafetyModeEnabled ?? false;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Dynamic Colors
@@ -88,33 +87,26 @@ class _HomePageState extends ConsumerState<HomePage>
             children: [
               const SizedBox(height: 20),
               // Status Indicator
+              // Status Indicator
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: isSafetyMode
-                      ? Colors.amber.withOpacity(0.2)
-                      : Colors.green.withOpacity(0.2),
+                  color: Colors.green.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: isSafetyMode ? Colors.amber : Colors.green,
-                  ),
+                  border: Border.all(color: Colors.green),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      isSafetyMode ? Icons.pause_circle : Icons.shield,
-                      color: isSafetyMode ? Colors.amber : Colors.green,
-                      size: 16,
-                    ),
+                    const Icon(Icons.shield, color: Colors.green, size: 16),
                     const SizedBox(width: 8),
-                    Text(
-                      isSafetyMode ? "MONITORING PAUSED" : "SYSTEM ACTIVE",
+                    const Text(
+                      "SYSTEM ACTIVE",
                       style: TextStyle(
-                        color: isSafetyMode ? Colors.amber : Colors.green,
+                        color: Colors.green,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -326,7 +318,7 @@ class _HomePageState extends ConsumerState<HomePage>
                   vertical: 32.0,
                 ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     _buildQuickAction(
                       context,
@@ -344,9 +336,9 @@ class _HomePageState extends ConsumerState<HomePage>
                     ),
                     _buildQuickAction(
                       context,
-                      Icons.history,
-                      "Activity Log",
-                      () => context.push('/activity-log'),
+                      Icons.account_tree_outlined,
+                      "Protocol", // Shortened for cleaner alignment
+                      () => context.push('/protocol-status'),
                       isDark,
                     ),
                   ],
@@ -366,30 +358,59 @@ class _HomePageState extends ConsumerState<HomePage>
     VoidCallback onTap,
     bool isDark,
   ) {
-    return InkWell(
-      onTap: onTap,
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(30),
+          child: Container(
+            width: 64,
+            height: 64,
             decoration: BoxDecoration(
-              color: isDark
-                  ? Colors.white.withOpacity(0.1)
-                  : Colors.deepPurple.withOpacity(0.1),
               shape: BoxShape.circle,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: isDark
+                    ? [
+                        Colors.deepPurpleAccent.withOpacity(0.4),
+                        Colors.deepPurple.withOpacity(0.1),
+                      ]
+                    : [Colors.white, Colors.deepPurple.shade50],
+              ),
+              border: Border.all(
+                color: isDark ? Colors.white24 : Colors.white,
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: isDark
+                      ? Colors.black26
+                      : Colors.deepPurple.withOpacity(0.1),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
             ),
-            child: Icon(icon, color: isDark ? Colors.white : Colors.deepPurple),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: TextStyle(
-              color: isDark ? Colors.white70 : Colors.grey.shade700,
-              fontSize: 12,
+            child: Icon(
+              icon,
+              color: isDark ? Colors.white : Colors.deepPurple,
+              size: 28,
             ),
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          label,
+          style: TextStyle(
+            color: isDark ? Colors.white70 : Colors.deepPurple.shade800,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.3,
+          ),
+        ),
+      ],
     );
   }
 }

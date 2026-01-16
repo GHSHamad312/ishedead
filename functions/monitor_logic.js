@@ -5,7 +5,7 @@ const admin = require('firebase-admin');
 
 exports.processInactivity = async () => {
     const db = admin.firestore();
-    const now = admin.firestore.Timestamp.now();
+    const now = new Date(); // Use JS Date instead of admin.firestore.Timestamp.now()
 
     // Get active users
     // Note: In a real app with many users, this query should be paginated or sharded.
@@ -15,8 +15,11 @@ exports.processInactivity = async () => {
 
     const promises = snapshot.docs.map(async (doc) => {
         const user = doc.data();
+        // Check if last_check_in exists
+        if (!user.last_check_in) return;
+
         const lastCheckIn = user.last_check_in.toDate();
-        const diffHours = (now.toDate() - lastCheckIn) / (1000 * 60 * 60);
+        const diffHours = (now - lastCheckIn) / (1000 * 60 * 60);
 
         // Use user's frequency, default to 24h if missing
         const frequency = user.check_in_frequency || 24;
@@ -77,11 +80,19 @@ exports.processInactivity = async () => {
             }
         }
 
-        // Update user state so we don't re-trigger immediately (or update alert level)
-        await db.collection('users').doc(doc.id).update({
+        // Update user state
+        const updateData = {
             last_alert_tier: tier,
             last_alert_time: now
-        });
+        };
+
+        // If we just executed Tier 3 (FINAL), mark user as Inactive to stop further checks.
+        if (tier >= 3) {
+            updateData.status = 'Inactive';
+            console.log(`User ${doc.id} reached Tier 3. Marking as Inactive.`);
+        }
+
+        await db.collection('users').doc(doc.id).update(updateData);
     });
 
     await Promise.all(promises);

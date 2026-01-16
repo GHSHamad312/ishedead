@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../services/profile_service.dart';
 import '../../auth/auth_provider.dart';
@@ -51,6 +52,12 @@ class _LegacyMessageScreenState extends ConsumerState<LegacyMessageScreen> {
           .updateLegacyMessage(user.uid, text);
 
       if (mounted) {
+        final profile = ref.read(userProfileProvider).value;
+        if (profile != null && !profile.isSetupComplete) {
+          context.pop();
+          return;
+        }
+
         setState(() {
           _isLoading = false;
           _isEditing = false; // Switch to view mode

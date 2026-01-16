@@ -7,20 +7,20 @@ import 'package:is_he_dead/features/auth/login_screen.dart';
 import 'package:is_he_dead/features/auth/register_screen.dart';
 import 'package:is_he_dead/features/auth/complete_profile_screen.dart';
 import 'package:is_he_dead/features/onboarding/screens/onboarding_screen.dart';
-import 'package:is_he_dead/features/payment/payment_screen.dart';
 import 'package:is_he_dead/features/profile/screens/profile_screen.dart';
 import 'package:is_he_dead/features/profile/screens/edit_contact_screen.dart';
 import 'package:is_he_dead/features/profile/models/emergency_contact.dart';
 import 'package:is_he_dead/features/profile/screens/upload_document_screen.dart';
 import 'package:is_he_dead/features/profile/services/profile_service.dart';
 import 'package:is_he_dead/features/medical/screens/medical_id_screen.dart';
-import 'package:is_he_dead/features/profile/screens/activity_log_screen.dart';
+import 'package:is_he_dead/features/home/screens/protocol_status_screen.dart';
 import 'package:is_he_dead/features/settings/screens/settings_screen.dart';
 import 'package:is_he_dead/core/widgets/scaffold_with_nav_bar.dart';
 import 'package:is_he_dead/core/providers/onboarding_provider.dart';
 import 'package:is_he_dead/features/home/screens/home_screen.dart';
 
 import 'package:is_he_dead/features/profile/screens/legacy_message_screen.dart';
+import 'package:is_he_dead/features/settings/screens/account_settings_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   // We use read() here because we want the GoRouter to persist.
@@ -77,10 +77,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/complete-profile',
         builder: (context, state) => const CompleteProfileScreen(),
       ),
-      GoRoute(
-        path: '/payment',
-        builder: (context, state) => const PaymentScreen(),
-      ),
+
       GoRoute(
         path: '/edit-contact',
         builder: (context, state) {
@@ -103,12 +100,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const ProfileScreen(isSetupMode: true),
       ),
       GoRoute(
-        path: '/activity-log',
-        builder: (context, state) => const ActivityLogScreen(),
+        path: '/protocol-status',
+        builder: (context, state) => const ProtocolStatusScreen(),
       ),
       GoRoute(
         path: '/legacy-message',
         builder: (context, state) => const LegacyMessageScreen(),
+      ),
+      GoRoute(
+        path: '/account-settings',
+        builder: (context, state) => const AccountSettingsScreen(),
       ),
     ],
   );
@@ -149,7 +150,9 @@ class RouterNotifier extends ChangeNotifier {
 
     if (isLoading) return null;
 
-    if (!seenOnboarding && path != '/onboarding') {
+    // Fix: Only force onboarding if NOT authenticated.
+    // Otherwise, authenticated users with !seenOnboarding get stuck in a loop (/onboarding -> / -> /onboarding)
+    if (!isAuthenticated && !seenOnboarding && path != '/onboarding') {
       return '/onboarding';
     }
 
@@ -172,6 +175,7 @@ class RouterNotifier extends ChangeNotifier {
           '/upload-doc',
           '/setup-contacts',
           '/edit-contact',
+          '/legacy-message',
         ];
 
         if (setupRoutes.contains(path)) return null;
