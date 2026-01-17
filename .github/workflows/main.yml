@@ -1,10 +1,10 @@
 name: Build iOS IPA
 on: [push]
+
 jobs:
   build-ios:
     runs-on: macos-latest
     steps:
-      # Use v4 (Latest)
       - uses: actions/checkout@v4
       
       - uses: subosito/flutter-action@v2
@@ -34,7 +34,6 @@ jobs:
           zip -r Runner.ipa Payload
           
       - name: Upload IPA
-        # UPDATED TO v4 (This fixes your error)
         uses: actions/upload-artifact@v4
         with:
           name: flutter-ios-app
