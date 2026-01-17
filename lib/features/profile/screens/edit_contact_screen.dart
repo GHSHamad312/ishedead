@@ -6,6 +6,8 @@ import '../models/emergency_contact.dart';
 import '../services/profile_service.dart';
 import '../../auth/auth_provider.dart';
 import 'package:is_he_dead/core/common/glass_phone_field.dart';
+import 'package:is_he_dead/core/utils/toast_utils.dart';
+import 'package:is_he_dead/core/utils/error_parser.dart';
 
 class EditContactScreen extends ConsumerStatefulWidget {
   final EmergencyContact? contact;
@@ -99,9 +101,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Error: $e')));
+          ToastUtils.showError(context, ErrorParser.parse(e));
         }
       } finally {
         if (mounted) {
@@ -391,9 +391,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
                           }
                         } catch (e) {
                           if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Error: $e')),
-                            );
+                            ToastUtils.showError(context, ErrorParser.parse(e));
                             setState(() => _isLoading = false);
                           }
                         }

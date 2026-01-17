@@ -80,6 +80,7 @@ class ProfileService {
       'last_check_in': FieldValue.serverTimestamp(),
       'last_alert_tier': 0, // Reset alert cycle
       'last_alert_time': null, // Clear last alert time
+      'status': 'Active', // Reset status to Active
     });
   }
 

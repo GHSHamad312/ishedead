@@ -19,6 +19,7 @@ exports.manualRunMonitor = functions.https.onRequest(async (req, res) => {
     res.send("Inactivity Monitor Run Complete. Check logs.");
 });
 
+
 // HTTP Trigger for manual testing
 exports.testInactivity = functions.https.onRequest(async (req, res) => {
     await monitor.processInactivity();

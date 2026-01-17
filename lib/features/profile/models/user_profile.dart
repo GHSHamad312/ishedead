@@ -16,6 +16,7 @@ class UserProfile {
   final bool voiceAuthEnabled;
   final Map<String, dynamic>? travelPlans;
   final String? legacyMessage;
+  final int lastAlertTier;
 
   const UserProfile({
     required this.uid,
@@ -32,6 +33,7 @@ class UserProfile {
     this.travelPlans,
     this.checkInFrequency = 24,
     this.legacyMessage,
+    this.lastAlertTier = 0,
   });
 
   factory UserProfile.fromMap(Map<String, dynamic> map, String uid) {
@@ -54,6 +56,7 @@ class UserProfile {
       travelPlans: map['travel_plans'] as Map<String, dynamic>?,
       checkInFrequency: map['check_in_frequency'] as int? ?? 24,
       legacyMessage: map['legacy_message'] as String?,
+      lastAlertTier: map['last_alert_tier'] as int? ?? 0,
     );
   }
 
@@ -72,6 +75,7 @@ class UserProfile {
       'travel_plans': travelPlans,
       'check_in_frequency': checkInFrequency,
       'legacy_message': legacyMessage,
+      'last_alert_tier': lastAlertTier,
     };
   }
 }

@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:is_he_dead/features/auth/auth_provider.dart';
 import 'package:is_he_dead/core/theme/vault_styles.dart';
+import 'package:is_he_dead/core/utils/toast_utils.dart';
+import 'package:is_he_dead/core/utils/error_parser.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -30,9 +32,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ToastUtils.showError(context, ErrorParser.parse(e));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -45,9 +45,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       await ref.read(authServiceProvider).signInWithGoogle();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Google Sign-In Failed: $e')));
+        ToastUtils.showError(context, ErrorParser.parse(e));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -131,7 +129,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                'Securely access your legacy',
+                                'Sign in to your account',
                                 style: TextStyle(
                                   color: VaultStyles.subTextColor(isDark),
                                   fontSize: 14,
@@ -193,7 +191,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                         ),
                                       )
                                     : const Text(
-                                        'ACCESS VAULT',
+                                        'SIGN IN',
                                         style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
@@ -288,7 +286,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       TextButton(
                         onPressed: () => context.go('/register'),
                         child: Text(
-                          'Create secure account',
+                          'Create Account',
                           style: TextStyle(
                             color: VaultStyles.textColor(isDark),
                             fontWeight: FontWeight.bold,

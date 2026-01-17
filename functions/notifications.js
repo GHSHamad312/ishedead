@@ -59,14 +59,16 @@ exports.sendEmail = async (contact, user, tier) => {
 
         const senderName = user.full_name || user.email || "Unknown User";
 
-        // Check permissions AND Tier Level (Only release data at Tier 3 or Test)
-        // If testing, we might want to show everything, or simulate permissions? 
-        // Let's assume for TEST we show what permissions allow.
+        // Check permissions AND Tier Level
+        // Legacy and Vault are ONLY for Tier 3 (Critical) or Test/Panic
+        // Medical Info is allowed for Tier 1+ (Warning) if authorized
         const effectiveIsCritical = isCritical || isTest;
+        const isWarningOrHigher = (typeof tier === 'number' && tier >= 1) || isPanic || isTest;
 
         const showLegacy = effectiveIsCritical && user.legacy_message && contact.accessLegacyMessage;
         const showVault = effectiveIsCritical && user.will_url && contact.accessVault;
-        const showMedical = effectiveIsCritical && user.medical_id && contact.accessMedicalInfo;
+        // Allow medical info for Tier 1+ if authorized
+        const showMedical = isWarningOrHigher && user.medical_info && contact.accessMedicalInfo;
 
         const textBody = isTest
             ? `This is a TEST alert initiated by ${senderName}. No action is required.`
@@ -76,14 +78,21 @@ exports.sendEmail = async (contact, user, tier) => {
                 (showLegacy ? `--- LEGACY MESSAGE ---\n"${user.legacy_message}"\n\n` : '') +
                 (showVault ? `--- DIGITAL VAULT ---\nAccess critical documents here: ${user.will_url}\n\n` : '') +
                 (showMedical ? `--- MEDICAL INFO ---\n` +
-                    (user.medical_id && user.medical_id.bloodType ? `Blood Type: ${user.medical_id.bloodType}\n` : '') +
-                    (user.medical_id && user.medical_id.conditions ? `Conditions: ${user.medical_id.conditions}\n` : '') +
-                    (user.medical_id && user.medical_id.allergies ? `Allergies: ${user.medical_id.allergies}\n` : '') +
-                    (user.medical_id && user.medical_id.medications ? `Medications: ${user.medical_id.medications}\n` : '')
+                    (user.medical_info && user.medical_info.bloodType ? `Blood Type: ${user.medical_info.bloodType}\n` : '') +
+                    (user.medical_info && user.medical_info.notes ? `Medical Notes: ${user.medical_info.notes}\n` : '') +
+                    (user.medical_info && user.medical_info.allergies && user.medical_info.allergies.length ? `Allergies: ${user.medical_info.allergies.join(', ')}\n` : '') +
+                    (user.medical_info && user.medical_info.medications && user.medical_info.medications.length ? `Medications: ${user.medical_info.medications.join(', ')}\n` : '')
                     : '')
                 : `URGENT: Wellness Check Needed for ${senderName}\n\n` +
                 `${senderName} has missed a scheduled safety check-in. Please contact them immediately to verify their safety.\n` +
-                `If they do not check in soon, the rigorous "Dead Man's Switch" protocol will execute and release secure information to designated contacts.`);
+                (showMedical ? `Medical Information is attached below to assist in this emergency.\n` : '') +
+                `If they do not check in soon, the rigorous "Dead Man's Switch" protocol will execute and release secure documents (Legacy Message, Digital Vault) to designated contacts.\n\n` +
+                (showMedical ? `--- MEDICAL INFO ---\n` +
+                    (user.medical_info && user.medical_info.bloodType ? `Blood Type: ${user.medical_info.bloodType}\n` : '') +
+                    (user.medical_info && user.medical_info.notes ? `Medical Notes: ${user.medical_info.notes}\n` : '') +
+                    (user.medical_info && user.medical_info.allergies && user.medical_info.allergies.length ? `Allergies: ${user.medical_info.allergies.join(', ')}\n` : '') +
+                    (user.medical_info && user.medical_info.medications && user.medical_info.medications.length ? `Medications: ${user.medical_info.medications.join(', ')}\n` : '')
+                    : ''));
 
         // Professional HTML Template
         let htmlBody;
@@ -147,10 +156,10 @@ exports.sendEmail = async (contact, user, tier) => {
                                     <span class="card-icon">🏥</span>
                                     <h3 class="card-title">Medical ID</h3>
                                 </div>
-                                ${user.medical_id && user.medical_id.bloodType ? `<p><strong>Blood Type:</strong> ${user.medical_id.bloodType}</p>` : ''}
-                                ${user.medical_id && user.medical_id.conditions ? `<p><strong>Conditions:</strong> ${user.medical_id.conditions}</p>` : ''}
-                                ${user.medical_id && user.medical_id.allergies ? `<p><strong>Allergies:</strong> ${user.medical_id.allergies}</p>` : ''}
-                                ${user.medical_id && user.medical_id.medications ? `<p><strong>Medications:</strong> ${user.medical_id.medications}</p>` : ''}
+                                ${user.medical_info && user.medical_info.bloodType ? `<p><strong>Blood Type:</strong> ${user.medical_info.bloodType}</p>` : ''}
+                                ${user.medical_info && user.medical_info.notes ? `<p><strong>Medical Notes:</strong> ${user.medical_info.notes}</p>` : ''}
+                                ${user.medical_info && user.medical_info.allergies && user.medical_info.allergies.length ? `<p><strong>Allergies:</strong> ${user.medical_info.allergies.join(', ')}</p>` : ''}
+                                ${user.medical_info && user.medical_info.medications && user.medical_info.medications.length ? `<p><strong>Medications:</strong> ${user.medical_info.medications.join(', ')}</p>` : ''}
                             </div>` : ''}
                             
                             ${user.phone ? `
@@ -198,7 +207,8 @@ exports.sendEmail = async (contact, user, tier) => {
                     ? `<p><strong>${senderName}</strong> has remained inactive for the full duration of their safety timer.</p>
                             <p>As per their instructions, the <strong>Dead Man's Switch Protocol</strong> has been executed. The following information is now being securely released to you:</p>`
                     : `<p><strong>${senderName}</strong> has missed a scheduled safety check-in.</p>
-                            <p>Please attempt to contact them immediately. If they remain inactive, their secure Digital Vault and Legacy Message will be released to designated contacts.</p>`
+                            <p>Please attempt to contact them immediately. If they remain inactive, their secure Digital Vault and Legacy Message will be released to designated contacts.</p>
+                            ${showMedical ? `<p><strong>Medical Information</strong> has been attached below to assist in case of an emergency.</p>` : ''}`
                 }
                     </div>
 
@@ -218,10 +228,10 @@ exports.sendEmail = async (contact, user, tier) => {
                     ${showMedical ? `
                     <div class="card" style="border-left-color: #e67e22;">
                         <h3>🏥 Medical Profile</h3>
-                        ${user.medical_id && user.medical_id.bloodType ? `<p><strong>Blood Type:</strong> ${user.medical_id.bloodType}</p>` : ''}
-                        ${user.medical_id && user.medical_id.conditions ? `<p><strong>Conditions:</strong> ${user.medical_id.conditions}</p>` : ''}
-                        ${user.medical_id && user.medical_id.allergies ? `<p><strong>Allergies:</strong> ${user.medical_id.allergies}</p>` : ''}
-                        ${user.medical_id && user.medical_id.medications ? `<p><strong>Medications:</strong> ${user.medical_id.medications}</p>` : ''}
+                        ${user.medical_info && user.medical_info.bloodType ? `<p><strong>Blood Type:</strong> ${user.medical_info.bloodType}</p>` : ''}
+                        ${user.medical_info && user.medical_info.notes ? `<p><strong>Medical Notes:</strong> ${user.medical_info.notes}</p>` : ''}
+                        ${user.medical_info && user.medical_info.allergies && user.medical_info.allergies.length ? `<p><strong>Allergies:</strong> ${user.medical_info.allergies.join(', ')}</p>` : ''}
+                        ${user.medical_info && user.medical_info.medications && user.medical_info.medications.length ? `<p><strong>Medications:</strong> ${user.medical_info.medications.join(', ')}</p>` : ''}
                     </div>` : ''}
 
                     <div class="footer">

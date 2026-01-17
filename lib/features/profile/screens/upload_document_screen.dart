@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import '../services/storage_service.dart';
 import '../services/profile_service.dart';
 import '../../auth/auth_provider.dart';
+import 'package:is_he_dead/core/utils/toast_utils.dart';
+import 'package:is_he_dead/core/utils/error_parser.dart';
 
 class UploadDocumentScreen extends ConsumerStatefulWidget {
   const UploadDocumentScreen({super.key});
@@ -51,17 +53,13 @@ class _UploadDocumentScreenState extends ConsumerState<UploadDocumentScreen> {
         await ref.read(profileServiceProvider).updateWillUrl(user.uid, url);
 
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('Upload Successful!')));
+          ToastUtils.showSuccess(context, 'Upload Successful!');
           context.pop();
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ToastUtils.showError(context, ErrorParser.parse(e));
       }
     } finally {
       if (mounted) {

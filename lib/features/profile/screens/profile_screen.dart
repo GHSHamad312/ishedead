@@ -71,6 +71,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     profile.fullName,
                     isDark,
                     surfaceColor,
+                    profile.lastAlertTier,
                   ),
 
                   const SizedBox(height: 32),
@@ -129,7 +130,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     String? name,
     bool isDark,
     Color surfaceColor,
+    int lastAlertTier,
   ) {
+    final isProtocolExecuted = lastAlertTier >= 3;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(32),
@@ -151,10 +155,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.greenAccent, width: 3),
+              border: Border.all(
+                color: isProtocolExecuted
+                    ? Colors.redAccent
+                    : Colors.greenAccent,
+                width: 3,
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.greenAccent.withOpacity(0.2),
+                  color: isProtocolExecuted
+                      ? Colors.redAccent.withOpacity(0.2)
+                      : Colors.greenAccent.withOpacity(0.2),
                   blurRadius: 20,
                   spreadRadius: 2,
                 ),
@@ -190,7 +201,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
             decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.1),
+              color: isProtocolExecuted
+                  ? Colors.red.withOpacity(0.1)
+                  : Colors.green.withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
@@ -199,18 +212,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 Container(
                   width: 8,
                   height: 8,
-                  decoration: const BoxDecoration(
-                    color: Colors.green,
+                  decoration: BoxDecoration(
+                    color: isProtocolExecuted ? Colors.red : Colors.green,
                     shape: BoxShape.circle,
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Text(
-                  "ACTIVE & PROTECTED",
+                Text(
+                  isProtocolExecuted
+                      ? "PROTOCOL EXECUTED"
+                      : "ACTIVE & PROTECTED",
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: Colors.green,
+                    color: isProtocolExecuted ? Colors.red : Colors.green,
                     letterSpacing: 0.5,
                   ),
                 ),

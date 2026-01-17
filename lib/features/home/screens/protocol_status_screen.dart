@@ -52,6 +52,8 @@ class ProtocolStatusScreen extends ConsumerWidget {
           final tier2Time = deadline.add(const Duration(hours: 12));
           final tier3Time = deadline.add(const Duration(hours: 24));
 
+          final isProtocolExecuted = profile.lastAlertTier >= 3;
+
           return SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -62,24 +64,30 @@ class ProtocolStatusScreen extends ConsumerWidget {
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: isDark
-                          ? [
-                              Colors.deepPurple.shade900,
-                              Colors.deepPurple.shade700,
-                            ]
-                          : [Colors.deepPurple.shade50, Colors.white],
+                      colors: isProtocolExecuted
+                          ? [Colors.red.shade900, Colors.red.shade700]
+                          : (isDark
+                                ? [
+                                    Colors.deepPurple.shade900,
+                                    Colors.deepPurple.shade700,
+                                  ]
+                                : [Colors.deepPurple.shade50, Colors.white]),
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: isDark
-                          ? Colors.deepPurpleAccent.withOpacity(0.3)
-                          : Colors.deepPurple.withOpacity(0.1),
+                      color: isProtocolExecuted
+                          ? Colors.redAccent.withOpacity(0.5)
+                          : (isDark
+                                ? Colors.deepPurpleAccent.withOpacity(0.3)
+                                : Colors.deepPurple.withOpacity(0.1)),
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.deepPurple.withOpacity(0.1),
+                        color: isProtocolExecuted
+                            ? Colors.red.withOpacity(0.2)
+                            : Colors.deepPurple.withOpacity(0.1),
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),
@@ -88,9 +96,13 @@ class ProtocolStatusScreen extends ConsumerWidget {
                   child: Column(
                     children: [
                       Text(
-                        "SYSTEM ACTIVE",
+                        isProtocolExecuted
+                            ? "PROTOCOL EXECUTED"
+                            : "SYSTEM ACTIVE",
                         style: TextStyle(
-                          color: isDark ? Colors.greenAccent : Colors.green,
+                          color: isProtocolExecuted
+                              ? Colors.redAccent
+                              : (isDark ? Colors.greenAccent : Colors.green),
                           fontWeight: FontWeight.bold,
                           letterSpacing: 2,
                           fontSize: 12,
@@ -98,7 +110,9 @@ class ProtocolStatusScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        "All Systems Normal",
+                        isProtocolExecuted
+                            ? "Emergency Mode"
+                            : "All Systems Normal",
                         style: TextStyle(
                           color: textColor,
                           fontSize: 24,
@@ -107,7 +121,9 @@ class ProtocolStatusScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        "Monitoring user activity. No anomalies detected.",
+                        isProtocolExecuted
+                            ? "The dead man's switch protocol has been executed. Information released."
+                            : "Monitoring user activity. No anomalies detected.",
                         textAlign: TextAlign.center,
                         style: TextStyle(color: hintColor),
                       ),
@@ -154,7 +170,8 @@ class ProtocolStatusScreen extends ConsumerWidget {
                   context,
                   time: tier1Time,
                   title: "Alert Level 1",
-                  subtitle: "Email notifications sent to trusted contacts",
+                  subtitle:
+                      "Email warning sent. Medical ID shared with capable contacts.",
                   icon: Icons.mark_email_read,
                   color: Colors.orangeAccent,
                   isDark: isDark,
@@ -176,7 +193,8 @@ class ProtocolStatusScreen extends ConsumerWidget {
                   context,
                   time: tier3Time,
                   title: "PROTOCOL EXECUTED",
-                  subtitle: "Automated calls placed. Vault Access Granted.",
+                  subtitle:
+                      "Vault & Legacy Message released. Automated calls placed.",
                   icon: Icons.phonelink_ring,
                   color: Colors.red,
                   isDark: isDark,
@@ -364,7 +382,7 @@ class ProtocolStatusScreen extends ConsumerWidget {
           CircleAvatar(
             backgroundColor: isDark ? Colors.grey[800] : Colors.grey[100],
             child: Text(
-              contact.name[0],
+              contact.name.isNotEmpty ? contact.name[0].toUpperCase() : '?',
               style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
             ),
           ),

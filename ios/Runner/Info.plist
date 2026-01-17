@@ -43,8 +43,7 @@
 	</array>
 	<key>NSContactsUsageDescription</key>
 	<string>This application requires access to your contacts to allow you to select emergency contacts for your safety network.</string>
-	<key>NSFaceIDUsageDescription</key>
-	<string>This application uses Face ID to securely authenticate you and protect your sensitive medical and legacy data.</string>
+
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This application needs access to your photo library to allow you to upload documents to your digital vault.</string>
 	<key>NSCameraUsageDescription</key>
@@ -53,5 +52,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This application needs access to the microphone for video recording verification.</string>
 </dict>
 </plist>

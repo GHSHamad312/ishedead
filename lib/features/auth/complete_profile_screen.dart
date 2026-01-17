@@ -6,6 +6,8 @@ import 'package:is_he_dead/features/profile/services/profile_service.dart';
 import 'package:is_he_dead/features/profile/models/user_profile.dart';
 import 'package:is_he_dead/core/theme/vault_styles.dart';
 import 'package:is_he_dead/core/common/glass_phone_field.dart';
+import 'package:is_he_dead/core/utils/toast_utils.dart';
+import 'package:is_he_dead/core/utils/error_parser.dart';
 
 class CompleteProfileScreen extends ConsumerStatefulWidget {
   const CompleteProfileScreen({super.key});
@@ -59,9 +61,7 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ToastUtils.showError(context, ErrorParser.parse(e));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -77,9 +77,7 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ToastUtils.showError(context, ErrorParser.parse(e));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

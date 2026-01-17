@@ -7,6 +7,8 @@ import 'package:is_he_dead/core/common/glass_phone_field.dart';
 import 'package:is_he_dead/core/theme/vault_styles.dart';
 import 'package:is_he_dead/features/auth/auth_provider.dart';
 import 'package:is_he_dead/features/profile/services/profile_service.dart';
+import 'package:is_he_dead/core/utils/toast_utils.dart';
+import 'package:is_he_dead/core/utils/error_parser.dart';
 
 class AccountSettingsScreen extends ConsumerStatefulWidget {
   const AccountSettingsScreen({super.key});
@@ -178,9 +180,7 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
-        );
+        ToastUtils.showError(context, ErrorParser.parse(e));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -385,18 +385,16 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
                                     .read(authServiceProvider)
                                     .sendPasswordResetEmail(profile.email);
                                 if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        "Password reset email sent to ${profile.email}",
-                                      ),
-                                    ),
+                                  ToastUtils.showSuccess(
+                                    context,
+                                    "Password reset email sent to ${profile.email}",
                                   );
                                 }
                               } catch (e) {
                                 if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text("Error: $e")),
+                                  ToastUtils.showError(
+                                    context,
+                                    ErrorParser.parse(e),
                                   );
                                 }
                               }

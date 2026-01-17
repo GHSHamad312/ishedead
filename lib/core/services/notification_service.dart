@@ -123,7 +123,8 @@ class NotificationService {
           presentSound: true,
           presentAlert: true,
           presentBanner: true,
-          interruptionLevel: InterruptionLevel.critical, // Critical alert
+          interruptionLevel:
+              InterruptionLevel.timeSensitive, // Standard high priority
         ),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,

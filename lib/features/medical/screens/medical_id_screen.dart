@@ -5,6 +5,8 @@ import 'package:is_he_dead/features/profile/services/profile_service.dart';
 import 'package:is_he_dead/features/auth/auth_provider.dart';
 import 'package:is_he_dead/features/profile/models/user_profile.dart';
 import 'package:go_router/go_router.dart';
+import 'package:is_he_dead/core/utils/toast_utils.dart';
+import 'package:is_he_dead/core/utils/error_parser.dart';
 
 class MedicalIdScreen extends ConsumerStatefulWidget {
   final MedicalInfo? initialData;
@@ -109,15 +111,11 @@ class _MedicalIdScreenState extends ConsumerState<MedicalIdScreen> {
         setState(
           () => _isEditing = false,
         ); // Successfully saved, switch to View
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Medical ID Updated')));
+        ToastUtils.showSuccess(context, 'Medical ID Updated');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ToastUtils.showError(context, ErrorParser.parse(e));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

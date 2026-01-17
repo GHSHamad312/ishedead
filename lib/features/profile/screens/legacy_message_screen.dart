@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../services/profile_service.dart';
 import '../../auth/auth_provider.dart';
+import 'package:is_he_dead/core/utils/toast_utils.dart';
+import 'package:is_he_dead/core/utils/error_parser.dart';
 
 class LegacyMessageScreen extends ConsumerStatefulWidget {
   const LegacyMessageScreen({super.key});
@@ -62,26 +64,12 @@ class _LegacyMessageScreenState extends ConsumerState<LegacyMessageScreen> {
           _isLoading = false;
           _isEditing = false; // Switch to view mode
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Message saved securely'),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            backgroundColor: Colors.green,
-          ),
-        );
+        ToastUtils.showSuccess(context, 'Message saved securely');
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error saving: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        ToastUtils.showError(context, ErrorParser.parse(e));
       }
     }
   }
@@ -123,9 +111,7 @@ class _LegacyMessageScreenState extends ConsumerState<LegacyMessageScreen> {
           _isLoading = false;
           _isEditing = true; // Go back to edit mode since it's empty
         });
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Message deleted')));
+        ToastUtils.showSuccess(context, 'Message deleted');
       }
     } catch (e) {
       if (mounted) {

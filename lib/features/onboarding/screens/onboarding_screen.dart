@@ -1,157 +1,230 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:introduction_screen/introduction_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:is_he_dead/core/providers/onboarding_provider.dart';
+// import 'package:is_he_dead/core/theme/vault_styles.dart'; // Keeping for primary color logic if needed, but unused now.
 
-class OnboardingScreen extends ConsumerWidget {
+class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
-  Future<void> _onIntroEnd(BuildContext context, WidgetRef ref) async {
-    // specific to Onboarding
-    await ref.read(onboardingServiceProvider).completeOnboarding();
+  @override
+  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
+}
 
-    if (context.mounted) {
-      // The router redirect should handle this automatically now that provider state changed
-      // But explicit navigation is safe too
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+
+  final List<OnboardingContent> _contents = [
+    OnboardingContent(
+      title: "Secure Your\nLegacy",
+      description:
+          "Ensuring your digital life, passwords, and messages reach the right people—on your terms.",
+      icon: Icons.shield_moon_outlined,
+    ),
+    OnboardingContent(
+      title: "Automated\nProtection",
+      description:
+          "We check in on you. A simple tap confirms you're okay. Silence triggers your safety protocol.",
+      icon: Icons.timer_outlined,
+    ),
+    OnboardingContent(
+      title: "Emergency\nProtocol",
+      description:
+          "If you don't respond, we automatically notify your trusted contacts and release your vault.",
+      icon: Icons.notification_important_outlined,
+    ),
+    OnboardingContent(
+      title: "The Secure\nVault",
+      description:
+          "Military-grade encryption for your Will, travel plans, and critical medical info.",
+      icon: Icons.lock_outline_rounded,
+    ),
+  ];
+
+  Future<void> _completeOnboarding() async {
+    await ref.read(onboardingServiceProvider).completeOnboarding();
+    if (mounted) {
       context.go('/login');
     }
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    const bodyStyle = TextStyle(fontSize: 16.0, color: Colors.grey);
-    const titleStyle = TextStyle(
-      fontSize: 28.0,
-      fontWeight: FontWeight.bold,
-      color: Colors.black87,
-    );
-
-    final pageDecoration = PageDecoration(
-      titleTextStyle: titleStyle,
-      bodyTextStyle: bodyStyle,
-      bodyPadding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-      pageColor: Colors.white,
-      imagePadding: const EdgeInsets.only(top: 40),
-      imageFlex: 2,
-    );
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final primaryColor = theme.primaryColor;
+    final backgroundColor = isDark ? const Color(0xFF0A0A0A) : Colors.white;
+    final textColor = isDark ? Colors.white : Colors.black;
+    final subTextColor = isDark ? Colors.grey[400] : Colors.grey[600];
 
     return Scaffold(
-      body: IntroductionScreen(
-        globalBackgroundColor: Colors.white,
-        allowImplicitScrolling: true,
-        autoScrollDuration: 3000,
-        pages: [
-          PageViewModel(
-            title: "Automated Wellness Checks",
-            body:
-                "We check in on you daily so you don't have to worry. Confirm you are okay with a single tap.",
-            image: _buildImage('onboarding_1.png'),
-            decoration: pageDecoration,
-          ),
-          PageViewModel(
-            title: "Tiered Alerts",
-            body:
-                "If you don't respond, we intelligently notify your trusted contacts via Email, SMS, or Voice Call.",
-            image: _buildImage('onboarding_2.png'),
-            decoration: pageDecoration,
-          ),
-          PageViewModel(
-            title: "Peace of Mind",
-            body:
-                "Securely store your Will, Travel Plans, and Medical Info. Accessible only when it matters most.",
-            image: _buildImage('onboarding_3.png', isBackupIcon: true),
-            decoration: pageDecoration,
-          ),
-        ],
-        onDone: () => _onIntroEnd(context, ref),
-        onSkip: () => _onIntroEnd(context, ref),
-        showSkipButton: true,
-        skipOrBackFlex: 0,
-        nextFlex: 0,
-        showBackButton: false,
-        back: const Icon(Icons.arrow_back),
-
-        // Premium Controls
-        skip: const Text(
-          'Skip',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: Colors.deepPurple,
-          ),
-        ),
-
-        next: Container(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            color: Colors.deepPurple.withOpacity(0.1),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(
-            Icons.arrow_forward_rounded,
-            color: Colors.deepPurple,
-          ),
-        ),
-
-        done: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          decoration: BoxDecoration(
-            color: Colors.deepPurple,
-            borderRadius: BorderRadius.circular(25),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.deepPurple.withOpacity(0.3),
-                blurRadius: 10,
-                offset: const Offset(0, 5),
+      backgroundColor: backgroundColor,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Top Bar (Skip)
+            Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: TextButton(
+                  onPressed: _completeOnboarding,
+                  child: Text(
+                    "Skip",
+                    style: TextStyle(
+                      color: subTextColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
               ),
-            ],
-          ),
-          child: const Text(
-            'Get Started',
-            style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
-          ),
-        ),
+            ),
 
-        curve: Curves.fastLinearToSlowEaseIn,
-        controlsMargin: const EdgeInsets.all(16),
-        controlsPadding: const EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 4.0),
-        dotsDecorator: DotsDecorator(
-          size: const Size(10.0, 10.0),
-          color: Colors.grey[300]!,
-          activeColor: Colors.deepPurple,
-          activeSize: const Size(22.0, 10.0),
-          activeShape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(25.0)),
-          ),
+            const SizedBox(height: 20),
+
+            // Main Content Area
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                onPageChanged: (index) => setState(() => _currentPage = index),
+                itemCount: _contents.length,
+                itemBuilder: (context, index) {
+                  final content = _contents[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 32),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Icon
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: primaryColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Icon(
+                            content.icon,
+                            size: 64,
+                            color: primaryColor,
+                          ),
+                        ),
+                        const SizedBox(height: 48),
+
+                        // Title
+                        Text(
+                          content.title,
+                          style: TextStyle(
+                            fontSize: 40,
+                            height: 1.1,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -1.0,
+                            color: textColor,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Description
+                        Text(
+                          content.description,
+                          style: TextStyle(
+                            fontSize: 18,
+                            height: 1.5,
+                            color: subTextColor,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            // Bottom Controls
+            Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: Column(
+                children: [
+                  // Page Indicators
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: List.generate(
+                      _contents.length,
+                      (index) => AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        margin: const EdgeInsets.only(right: 8),
+                        height: 6,
+                        width: _currentPage == index ? 32 : 6,
+                        decoration: BoxDecoration(
+                          color: _currentPage == index
+                              ? primaryColor
+                              : (isDark ? Colors.white24 : Colors.black12),
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Big Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (_currentPage == _contents.length - 1) {
+                          _completeOnboarding();
+                        } else {
+                          _pageController.nextPage(
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.fastOutSlowIn,
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: Text(
+                        _currentPage == _contents.length - 1
+                            ? "Get Started"
+                            : "Continue",
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildImage(
-    String assetName, {
-    bool isBackupIcon = false,
-    double width = 300,
-  }) {
-    if (isBackupIcon) {
-      return const Icon(
-        Icons.security_rounded,
-        size: 120,
-        color: Colors.deepPurple,
-      );
-    }
-    // Return asset or placeholder if missing
-    return Image.asset(
-      'assets/images/$assetName',
-      width: width,
-      errorBuilder: (context, error, stackTrace) {
-        return const Icon(
-          Icons.image_not_supported,
-          size: 80,
-          color: Colors.grey,
-        );
-      },
-    );
-  }
+class OnboardingContent {
+  final String title;
+  final String description;
+  final IconData icon;
+
+  OnboardingContent({
+    required this.title,
+    required this.description,
+    required this.icon,
+  });
 }

@@ -7,6 +7,8 @@ import 'package:is_he_dead/features/profile/services/profile_service.dart';
 import 'package:is_he_dead/features/profile/models/user_profile.dart';
 import 'package:is_he_dead/core/theme/vault_styles.dart';
 import 'package:is_he_dead/core/common/glass_phone_field.dart';
+import 'package:is_he_dead/core/utils/toast_utils.dart';
+import 'package:is_he_dead/core/utils/error_parser.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -56,9 +58,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ToastUtils.showError(context, ErrorParser.parse(e));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -144,7 +144,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               Text(
-                                'Start Your Legacy',
+                                'Create Account',
                                 style: TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
@@ -155,7 +155,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                'Join the secure protection network',
+                                'Sign up to get started',
                                 style: TextStyle(
                                   color: VaultStyles.subTextColor(isDark),
                                   fontSize: 14,
@@ -251,7 +251,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                         ),
                                       )
                                     : const Text(
-                                        'CREATE ACCOUNT',
+                                        'SIGN UP',
                                         style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,

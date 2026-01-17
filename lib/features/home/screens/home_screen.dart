@@ -6,6 +6,9 @@ import 'package:go_router/go_router.dart';
 import 'package:is_he_dead/core/services/notification_service.dart';
 import 'package:is_he_dead/features/auth/auth_provider.dart';
 import 'package:is_he_dead/features/profile/services/profile_service.dart';
+import 'package:is_he_dead/features/profile/models/user_profile.dart';
+import 'package:is_he_dead/core/utils/toast_utils.dart';
+import 'package:is_he_dead/core/utils/error_parser.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -67,12 +70,6 @@ class _HomePageState extends ConsumerState<HomePage>
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.notifications_none, color: iconColor),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -88,31 +85,56 @@ class _HomePageState extends ConsumerState<HomePage>
               const SizedBox(height: 20),
               // Status Indicator
               // Status Indicator
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.green),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.shield, color: Colors.green, size: 16),
-                    const SizedBox(width: 8),
-                    const Text(
-                      "SYSTEM ACTIVE",
-                      style: TextStyle(
-                        color: Colors.green,
-                        fontWeight: FontWeight.bold,
+              // Status Indicator
+              if (userProfileAsync.value != null) ...[
+                Builder(
+                  builder: (context) {
+                    final profile = userProfileAsync.value!;
+                    final isProtocolExecuted = profile.lastAlertTier >= 3;
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
                       ),
-                    ),
-                  ],
+                      decoration: BoxDecoration(
+                        color: isProtocolExecuted
+                            ? Colors.red.withOpacity(0.2)
+                            : Colors.green.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: isProtocolExecuted ? Colors.red : Colors.green,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isProtocolExecuted
+                                ? Icons.warning_rounded
+                                : Icons.shield,
+                            color: isProtocolExecuted
+                                ? Colors.red
+                                : Colors.green,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            isProtocolExecuted
+                                ? "PROTOCOL EXECUTED"
+                                : "SYSTEM ACTIVE",
+                            style: TextStyle(
+                              color: isProtocolExecuted
+                                  ? Colors.red
+                                  : Colors.green,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
-              ),
+              ],
 
               const Spacer(),
 
@@ -122,53 +144,38 @@ class _HomePageState extends ConsumerState<HomePage>
                     ? null
                     : () async {
                         if (user != null) {
-                          HapticFeedback.heavyImpact();
-                          setState(() => _isLoading = true);
-
-                          try {
-                            await ref
-                                .read(profileServiceProvider)
-                                .updateLastCheckIn(user.uid);
-
-                            // Reschedule Notification
-                            if (userProfileAsync.value != null) {
-                              final freq =
-                                  userProfileAsync.value!.checkInFrequency;
-                              await ref
-                                  .read(notificationServiceProvider)
-                                  .scheduleOverdueNotification(
-                                    Duration(hours: freq),
-                                  );
-                              await ref
-                                  .read(notificationServiceProvider)
-                                  .schedulePreDueNotification(
-                                    Duration(hours: freq),
-                                  );
-                            }
-
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    "I'm Alive confirmed! Timer reset.",
+                          // Check if protocol was executed
+                          final profile = userProfileAsync.value;
+                          if (profile != null && profile.lastAlertTier >= 3) {
+                            // Show Confirmation Dialog
+                            final confirm = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text("Restart Monitoring?"),
+                                content: const Text(
+                                  "The emergency protocol was previously executed. Confirming you are alive will RESET the system and restart normal safety monitoring.",
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, false),
+                                    child: const Text("Cancel"),
                                   ),
-                                  backgroundColor: Colors.green,
-                                  duration: Duration(seconds: 2),
-                                ),
-                              );
-                            }
-                          } catch (e) {
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text("Error: $e"),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
-                            }
-                          } finally {
-                            if (mounted) setState(() => _isLoading = false);
+                                  ElevatedButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, true),
+                                    child: const Text("Confirm & Reset"),
+                                  ),
+                                ],
+                              ),
+                            );
+                            if (confirm != true) return;
                           }
+
+                          await _performCheckIn(
+                            user.uid,
+                            userProfileAsync.value,
+                          );
                         }
                       },
                 child: Stack(
@@ -349,6 +356,25 @@ class _HomePageState extends ConsumerState<HomePage>
         ),
       ),
     );
+  }
+
+  Future<void> _performCheckIn(String uid, UserProfile? profile) async {
+    setState(() => _isLoading = true);
+    try {
+      await ref.read(profileServiceProvider).updateLastCheckIn(uid);
+
+      if (mounted) {
+        ToastUtils.showSuccess(context, 'Check-in successful! System active.');
+      }
+    } catch (e) {
+      if (mounted) {
+        ToastUtils.showError(context, ErrorParser.parse(e));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   Widget _buildQuickAction(

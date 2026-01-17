@@ -6,6 +6,8 @@ import 'package:is_he_dead/core/providers/theme_provider.dart';
 import 'package:is_he_dead/features/auth/auth_provider.dart';
 import 'package:is_he_dead/features/profile/services/profile_service.dart';
 import 'package:is_he_dead/core/services/notification_service.dart';
+import 'package:is_he_dead/core/utils/toast_utils.dart';
+import 'package:is_he_dead/core/utils/error_parser.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -177,10 +179,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       .read(notificationServiceProvider)
                       .scheduleOverdueNotification(const Duration(seconds: 5));
                   if (parentContext.mounted) {
-                    ScaffoldMessenger.of(parentContext).showSnackBar(
-                      const SnackBar(
-                        content: Text("Test Alert scheduled for 5 seconds."),
-                      ),
+                    ToastUtils.showSuccess(
+                      parentContext,
+                      "Test Alert scheduled for 5 seconds.",
                     );
                   }
                 },
@@ -268,17 +269,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         // Try to pop the loading indicator
         Navigator.of(context, rootNavigator: true).pop();
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
-        );
+        ToastUtils.showError(context, ErrorParser.parse(e));
       }
     }
   }
 
   void _showCheckInFrequencyDialog(BuildContext context, int currentFreqHours) {
-    // Convert hours to days (default minimum 1 day)
-    int selectedDays = (currentFreqHours / 24).round();
-    if (selectedDays < 1) selectedDays = 1;
+    // Convert hours to double for slider (range 24-72 hours)
+    // Default to 24 if current is out of range or strange
+    double selectedHours = currentFreqHours.toDouble();
+    if (selectedHours < 24) selectedHours = 24;
+    if (selectedHours > 72) selectedHours = 72;
 
     showDialog(
       context: context,
@@ -356,7 +357,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ],
                       ),
                       child: Text(
-                        "Every $selectedDays Day${selectedDays > 1 ? 's' : ''}",
+                        "${(selectedHours / 24).toStringAsFixed(1)} Day${selectedHours > 24 ? 's' : ''}",
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -381,7 +382,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               ),
                             ),
                             Text(
-                              "7 Days",
+                              "3 Days",
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
@@ -405,13 +406,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             overlayColor: Colors.deepPurple.withOpacity(0.1),
                           ),
                           child: Slider(
-                            value: selectedDays.toDouble().clamp(1.0, 7.0),
-                            min: 1,
-                            max: 7,
-                            divisions: 6,
+                            value: selectedHours,
+                            min: 24,
+                            max: 72,
+                            divisions: 48, // Hourly increments 24-72 (48 steps)
+                            label: "${selectedHours.round()}h",
                             onChanged: (val) {
                               setDialogState(() {
-                                selectedDays = val.round();
+                                selectedHours = val;
                               });
                             },
                           ),
@@ -444,7 +446,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   .read(authServiceProvider)
                                   .currentUser;
                               if (user != null) {
-                                final hours = selectedDays * 24;
+                                final hours = selectedHours.round();
                                 await ref
                                     .read(profileServiceProvider)
                                     .updateCheckInFrequency(user.uid, hours);
@@ -529,18 +531,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         });
 
         if (parentContext.mounted) {
-          ScaffoldMessenger.of(parentContext).showSnackBar(
-            const SnackBar(
-              content: Text("Protocol Initiated. Alerts sent."),
-              backgroundColor: Colors.red,
-            ),
+          ToastUtils.showError(
+            parentContext,
+            "Protocol Initiated. Alerts sent.",
           );
         }
       } catch (e) {
         if (parentContext.mounted) {
-          ScaffoldMessenger.of(
-            parentContext,
-          ).showSnackBar(SnackBar(content: Text("Failed to trigger: $e")));
+          ToastUtils.showError(parentContext, "Failed to trigger: $e");
         }
       }
     }
