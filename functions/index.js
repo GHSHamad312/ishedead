@@ -90,7 +90,12 @@ exports.debugAlert = functions.https.onCall(async (data, context) => {
                 } catch (e) {
                     console.error("Failed to send Panic SMS:", e);
                 }
-                // await notifications.sendCall(contact, user); // keeping call optional/commented if not configured
+
+                try {
+                    await notifications.sendCall(contact, user);
+                } catch (e) {
+                    console.error("Failed to send Panic Call:", e);
+                }
             }
         });
 

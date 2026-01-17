@@ -43,8 +43,8 @@ dependencies:
   encrypt: ^5.0.3
   file_picker: ^8.0.3
   uuid: ^4.4.0
-  flutter_local_notifications: ^19.5.0
-  timezone: ^0.10.0
+  flutter_local_notifications: ^17.2.2
+  timezone: ^0.9.4
   shared_preferences: ^2.3.0
   google_sign_in: ^6.1.6
   sign_in_with_apple: ^6.1.0

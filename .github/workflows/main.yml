@@ -1,30 +1,16 @@
 name: Build iOS IPA
 on: [push]
-
 jobs:
   build-ios:
     runs-on: macos-latest
     steps:
+      # Use v4 (Latest)
       - uses: actions/checkout@v4
       
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
       
-      - name: Install Dependencies
-        run: |
-          flutter clean
-          flutter pub get
-          flutter precache --ios
-
-      - name: Install CocoaPods
-        run: |
-          cd ios
-          rm -rf Pods
-          rm -f Podfile.lock
-          pod install --repo-update
-          cd ..
-          
       - name: Build IPA (No Signing)
         run: |
           flutter build ios --release --no-codesign
@@ -34,6 +20,7 @@ jobs:
           zip -r Runner.ipa Payload
           
       - name: Upload IPA
+        # UPDATED TO v4 (This fixes your error)
         uses: actions/upload-artifact@v4
         with:
           name: flutter-ios-app

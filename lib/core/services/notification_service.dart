@@ -115,7 +115,7 @@ class NotificationService {
           channelDescription: 'Critical alerts when check-in is overdue',
           importance: Importance.max,
           priority: Priority.high,
-          fullScreenIntent: true, // Try to wake screen
+          fullScreenIntent: true,
           color: android.Color(0xFFFF0000),
           playSound: true,
         ),
