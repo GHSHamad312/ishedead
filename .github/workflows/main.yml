@@ -1,27 +1,62 @@
-name: Build iOS IPA
-on: [push]
+name: Build iOS IPA (Flutter)
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
 jobs:
   build-ios:
     runs-on: macos-latest
+
     steps:
-      # Use v4 (Latest)
-      - uses: actions/checkout@v4
-      
-      - uses: subosito/flutter-action@v2
+      # 1️⃣ Checkout source
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup Flutter
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
-      
-      - name: Build IPA (No Signing)
+          channel: stable
+          cache: true
+
+      # 3️⃣ Install CocoaPods (required on CI)
+      - name: Install CocoaPods
+        run: sudo gem install cocoapods
+
+      # 4️⃣ Flutter clean (IMPORTANT)
+      - name: Flutter clean
+        run: flutter clean
+
+      # 5️⃣ Get dependencies
+      - name: Flutter pub get
+        run: flutter pub get
+
+      # 6️⃣ iOS pod install (ensures Flutter.framework exists)
+      - name: Install iOS Pods
         run: |
-          flutter build ios --release --no-codesign
+          cd ios
+          pod install --repo-update
+          cd ..
+
+      # 7️⃣ Build iOS (no signing)
+      - name: Build iOS (Release, No Codesign)
+        run: flutter build ios --release --no-codesign
+
+      # 8️⃣ Create IPA manually
+      - name: Create IPA
+        run: |
           cd build/ios/iphoneos
           mkdir Payload
-          cp -r Runner.app Payload/
+          cp -R Runner.app Payload/
           zip -r Runner.ipa Payload
-          
+
+      # 9️⃣ Upload IPA artifact
       - name: Upload IPA
-        # UPDATED TO v4 (This fixes your error)
         uses: actions/upload-artifact@v4
         with:
-          name: flutter-ios-app
+          name: flutter-ios-ipa
           path: build/ios/iphoneos/Runner.ipa
