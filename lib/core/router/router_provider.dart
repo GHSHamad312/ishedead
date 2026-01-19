@@ -18,7 +18,6 @@ import 'package:is_he_dead/features/settings/screens/settings_screen.dart';
 import 'package:is_he_dead/core/widgets/scaffold_with_nav_bar.dart';
 import 'package:is_he_dead/core/providers/onboarding_provider.dart';
 import 'package:is_he_dead/features/home/screens/home_screen.dart';
-
 import 'package:is_he_dead/features/profile/screens/legacy_message_screen.dart';
 import 'package:is_he_dead/features/settings/screens/account_settings_screen.dart';
 

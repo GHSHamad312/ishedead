@@ -49,8 +49,8 @@ class ProtocolStatusScreen extends ConsumerWidget {
 
           // Tiers based on logic
           final tier1Time = deadline.add(const Duration(hours: 2));
-          final tier2Time = deadline.add(const Duration(hours: 12));
-          final tier3Time = deadline.add(const Duration(hours: 24));
+          final tier2Time = deadline.add(const Duration(hours: 24));
+          final tier3Time = deadline.add(const Duration(hours: 48));
 
           final isProtocolExecuted = profile.lastAlertTier >= 3;
 

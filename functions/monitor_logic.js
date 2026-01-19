@@ -2,7 +2,6 @@ const notifications = require('./notifications');
 const admin = require('firebase-admin');
 
 
-
 exports.processInactivity = async () => {
     const db = admin.firestore();
     const now = new Date(); // Use JS Date instead of admin.firestore.Timestamp.now()
@@ -26,12 +25,12 @@ exports.processInactivity = async () => {
 
         // Define tiers relative to frequency
         // Tier 1 (Overdue): Frequency + 2h
-        // Tier 2 (Warning): Frequency + 12h
-        // Tier 3 (Critical): Frequency + 24h
+        // Tier 2 (Warning): Frequency + 24h
+        // Tier 3 (Critical): Frequency + 48h
 
         const TIER_1_THRESHOLD = frequency + 2;
-        const TIER_2_THRESHOLD = frequency + 12;
-        const TIER_3_THRESHOLD = frequency + 24;
+        const TIER_2_THRESHOLD = frequency + 24;
+        const TIER_3_THRESHOLD = frequency + 48;
 
         if (diffHours < TIER_1_THRESHOLD) return; // Still active
 
@@ -45,7 +44,6 @@ exports.processInactivity = async () => {
 
         // Check if we already triggered this tier today/for this period
         // For MVP, we simply re-trigger or check a 'last_alert_sent' field.
-        // Let's implement a simple check: don't alert if last_alert_tier >= current_tier
         if (user.last_alert_tier && user.last_alert_tier >= tier) {
             // But wait, if time passed and we moved from T1 to T2, we MUST trigger.
             // If we are still in T1 and already sent T1, don't send again?

@@ -5,7 +5,6 @@ const monitor = require('./monitor_logic');
 admin.initializeApp();
 
 // Run every 60 minutes
-// For testing, you can change this to 'every 1 minutes'
 exports.checkInactivity = functions.pubsub.schedule('every 60 minutes').onRun(async (context) => {
     console.log('Running Inactivity Monitor...');
     await monitor.processInactivity();
@@ -20,7 +19,7 @@ exports.manualRunMonitor = functions.https.onRequest(async (req, res) => {
 });
 
 
-// HTTP Trigger for manual testing
+// HTTP Trigger for manual testing (redundant with above, but separate endpoint)
 exports.testInactivity = functions.https.onRequest(async (req, res) => {
     await monitor.processInactivity();
     res.send("Inactivity check executed.");
@@ -28,7 +27,7 @@ exports.testInactivity = functions.https.onRequest(async (req, res) => {
 
 console.log("Loading functions/index.js...");
 
-// Callable Function for granular testing (Email/SMS/Call)
+
 exports.debugAlert = functions.https.onCall(async (data, context) => {
     console.log("debugAlert called!");
     // 1. Verify Authentication
@@ -75,7 +74,7 @@ exports.debugAlert = functions.https.onCall(async (data, context) => {
                 await db.collection('users').doc(uid).update({
                     status: 'Inactive',
                     last_alert_time: new Date(),
-                    last_alert_tier: 3 // Max tier
+                    last_alert_tier: 3
                 });
 
                 // 2. Send ALL notification types

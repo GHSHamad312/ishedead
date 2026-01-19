@@ -106,13 +106,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         Container(
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: primaryColor.withOpacity(0.1),
+                            color: isDark
+                                ? Colors.white10
+                                : primaryColor.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Icon(
                             content.icon,
                             size: 64,
-                            color: primaryColor,
+                            color: isDark ? Colors.white : primaryColor,
                           ),
                         ),
                         const SizedBox(height: 48),

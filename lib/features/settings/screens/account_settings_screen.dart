@@ -234,7 +234,7 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
-                      color: theme.primaryColor,
+                      color: isDark ? Colors.white : theme.primaryColor,
                     ),
                   ),
           ),
@@ -295,15 +295,6 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 12),
-                            if (_isEditing)
-                              Text(
-                                "Change Photo",
-                                style: TextStyle(
-                                  color: theme.primaryColor,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
                           ],
                         ),
                       ),
