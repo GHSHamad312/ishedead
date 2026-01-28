@@ -6,6 +6,7 @@ import 'package:is_he_dead/features/auth/auth_provider.dart';
 import 'package:is_he_dead/features/auth/login_screen.dart';
 import 'package:is_he_dead/features/auth/register_screen.dart';
 import 'package:is_he_dead/features/auth/complete_profile_screen.dart';
+import 'package:is_he_dead/features/auth/email_verification_screen.dart';
 import 'package:is_he_dead/features/onboarding/screens/onboarding_screen.dart';
 import 'package:is_he_dead/features/profile/screens/profile_screen.dart';
 import 'package:is_he_dead/features/profile/screens/edit_contact_screen.dart';
@@ -20,6 +21,7 @@ import 'package:is_he_dead/core/providers/onboarding_provider.dart';
 import 'package:is_he_dead/features/home/screens/home_screen.dart';
 import 'package:is_he_dead/features/profile/screens/legacy_message_screen.dart';
 import 'package:is_he_dead/features/settings/screens/account_settings_screen.dart';
+import 'package:is_he_dead/features/settings/screens/privacy_policy_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   // We use read() here because we want the GoRouter to persist.
@@ -76,6 +78,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/complete-profile',
         builder: (context, state) => const CompleteProfileScreen(),
       ),
+      GoRoute(
+        path: '/verify-email',
+        builder: (context, state) => const EmailVerificationScreen(),
+      ),
 
       GoRoute(
         path: '/edit-contact',
@@ -110,6 +116,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/account-settings',
         builder: (context, state) => const AccountSettingsScreen(),
       ),
+      GoRoute(
+        path: '/privacy-policy',
+        builder: (context, state) => const PrivacyPolicyScreen(),
+      ),
     ],
   );
 });
@@ -122,9 +132,9 @@ class RouterNotifier extends ChangeNotifier {
   final Ref _ref;
 
   RouterNotifier(this._ref) {
-    _ref.listen(authStateProvider, (_, __) => _notify());
-    _ref.listen(userProfileProvider, (_, __) => _notify());
-    _ref.listen(onboardingProvider, (_, __) => _notify());
+    _ref.listen(authStateProvider, (_, _) => _notify());
+    _ref.listen(userProfileProvider, (_, _) => _notify());
+    _ref.listen(onboardingProvider, (_, _) => _notify());
   }
 
   /// Wraps notifyListeners in a microtask to ensure we don't
@@ -162,6 +172,18 @@ class RouterNotifier extends ChangeNotifier {
     }
 
     if (isAuthenticated) {
+      final user = authState.value;
+      if (user != null && !user.emailVerified) {
+        if (path == '/verify-email') return null; // Stay on verification screen
+        return '/verify-email';
+      }
+
+      if (path == '/verify-email') {
+        // If verified but on verify screen, let 'setup' logic take over
+        // or just go home if setup is done.
+        // We let the flow fall through to setup check.
+      }
+
       final profile = userProfileState.value;
       final isProfileDocsCheckPassed = profile != null;
       final isSetupComplete =

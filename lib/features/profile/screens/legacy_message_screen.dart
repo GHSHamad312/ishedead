@@ -185,7 +185,7 @@ class _LegacyMessageScreenState extends ConsumerState<LegacyMessageScreen> {
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.deepPurple.withOpacity(0.1),
+                        color: Colors.deepPurple.withValues(alpha: 0.1),
                         blurRadius: 15,
                         offset: const Offset(0, 8),
                       ),
@@ -282,7 +282,7 @@ class _LegacyMessageScreenState extends ConsumerState<LegacyMessageScreen> {
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 20),
                         elevation: 8,
-                        shadowColor: primaryColor.withOpacity(0.5),
+                        shadowColor: primaryColor.withValues(alpha: 0.5),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
@@ -370,7 +370,7 @@ class _LegacyMessageScreenState extends ConsumerState<LegacyMessageScreen> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -417,7 +417,7 @@ class _LegacyMessageScreenState extends ConsumerState<LegacyMessageScreen> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -433,7 +433,7 @@ class _LegacyMessageScreenState extends ConsumerState<LegacyMessageScreen> {
         children: [
           Icon(
             Icons.format_quote_rounded,
-            color: Colors.deepPurpleAccent.withOpacity(0.5),
+            color: Colors.deepPurpleAccent.withValues(alpha: 0.5),
             size: 40,
           ),
           const SizedBox(height: 16),
@@ -442,7 +442,7 @@ class _LegacyMessageScreenState extends ConsumerState<LegacyMessageScreen> {
             style: TextStyle(
               fontSize: 18,
               height: 1.8,
-              color: textColor.withOpacity(0.9),
+              color: textColor.withValues(alpha: 0.9),
               fontStyle: FontStyle.italic,
               fontFamily: 'Georgia', // Serif font for "Letter" feel
             ),
@@ -452,7 +452,7 @@ class _LegacyMessageScreenState extends ConsumerState<LegacyMessageScreen> {
             alignment: Alignment.bottomRight,
             child: Icon(
               Icons.format_quote_rounded,
-              color: Colors.deepPurpleAccent.withOpacity(0.2),
+              color: Colors.deepPurpleAccent.withValues(alpha: 0.2),
               size: 40,
             ),
           ),

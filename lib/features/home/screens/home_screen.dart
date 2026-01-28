@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:is_he_dead/core/services/notification_service.dart';
@@ -98,8 +97,8 @@ class _HomePageState extends ConsumerState<HomePage>
                       ),
                       decoration: BoxDecoration(
                         color: isProtocolExecuted
-                            ? Colors.red.withOpacity(0.2)
-                            : Colors.green.withOpacity(0.2),
+                            ? Colors.red.withValues(alpha: 0.2)
+                            : Colors.green.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: isProtocolExecuted ? Colors.red : Colors.green,
@@ -194,8 +193,8 @@ class _HomePageState extends ConsumerState<HomePage>
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: isDark
-                              ? Colors.deepPurpleAccent.withOpacity(0.3)
-                              : Colors.purple.withOpacity(0.05),
+                              ? Colors.deepPurpleAccent.withValues(alpha: 0.3)
+                              : Colors.purple.withValues(alpha: 0.05),
                         ),
                       ),
                     ),
@@ -217,8 +216,8 @@ class _HomePageState extends ConsumerState<HomePage>
                         boxShadow: [
                           BoxShadow(
                             color: isDark
-                                ? Colors.purple.withOpacity(0.5)
-                                : Colors.deepPurple.withOpacity(0.3),
+                                ? Colors.purple.withValues(alpha: 0.5)
+                                : Colors.deepPurple.withValues(alpha: 0.3),
                             blurRadius: 20,
                             spreadRadius: 5,
                             offset: const Offset(0, 8),
@@ -400,8 +399,8 @@ class _HomePageState extends ConsumerState<HomePage>
                 end: Alignment.bottomRight,
                 colors: isDark
                     ? [
-                        Colors.deepPurpleAccent.withOpacity(0.4),
-                        Colors.deepPurple.withOpacity(0.1),
+                        Colors.deepPurpleAccent.withValues(alpha: 0.4),
+                        Colors.deepPurple.withValues(alpha: 0.1),
                       ]
                     : [Colors.white, Colors.deepPurple.shade50],
               ),
@@ -413,7 +412,7 @@ class _HomePageState extends ConsumerState<HomePage>
                 BoxShadow(
                   color: isDark
                       ? Colors.black26
-                      : Colors.deepPurple.withOpacity(0.1),
+                      : Colors.deepPurple.withValues(alpha: 0.1),
                   blurRadius: 12,
                   offset: const Offset(0, 6),
                 ),

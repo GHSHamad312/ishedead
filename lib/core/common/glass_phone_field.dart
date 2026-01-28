@@ -71,7 +71,7 @@ class GlassPhoneField extends StatelessWidget {
               fillColor: fillColor ?? VaultStyles.inputFillColor(isDark),
               hintText: 'Phone Number',
               hintStyle: TextStyle(
-                color: VaultStyles.subTextColor(isDark).withOpacity(0.5),
+                color: VaultStyles.subTextColor(isDark).withValues(alpha: 0.5),
               ),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
@@ -84,14 +84,14 @@ class GlassPhoneField extends StatelessWidget {
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withValues(alpha: 0.1),
                   width: 1,
                 ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
-                  color: Colors.deepPurpleAccent.withOpacity(0.5),
+                  color: Colors.deepPurpleAccent.withValues(alpha: 0.5),
                   width: 1.5,
                 ),
               ),

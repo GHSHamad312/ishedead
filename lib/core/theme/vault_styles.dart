@@ -18,11 +18,13 @@ class VaultStyles {
   static LinearGradient bgGradient(bool isDark) =>
       isDark ? darkGradient : lightGradient;
 
-  static Color glassColor(bool isDark) =>
-      isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.6);
+  static Color glassColor(bool isDark) => isDark
+      ? Colors.white.withValues(alpha: 0.1)
+      : Colors.white.withValues(alpha: 0.6);
 
-  static Color glassBorderColor(bool isDark) =>
-      isDark ? Colors.white24.withOpacity(0.2) : Colors.white.withOpacity(0.4);
+  static Color glassBorderColor(bool isDark) => isDark
+      ? Colors.white24.withValues(alpha: 0.2)
+      : Colors.white.withValues(alpha: 0.4);
 
   static Color textColor(bool isDark) => isDark ? Colors.white : Colors.black87;
 
@@ -32,21 +34,22 @@ class VaultStyles {
   static List<BoxShadow> shadow(bool isDark) => isDark
       ? [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
         ]
       : [
           BoxShadow(
-            color: Colors.deepPurple.withOpacity(0.1),
+            color: Colors.deepPurple.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
         ];
 
-  static Color inputFillColor(bool isDark) =>
-      isDark ? Colors.black.withOpacity(0.2) : Colors.white.withOpacity(0.5);
+  static Color inputFillColor(bool isDark) => isDark
+      ? Colors.black.withValues(alpha: 0.2)
+      : Colors.white.withValues(alpha: 0.5);
 
   static Color iconColor(bool isDark) =>
       isDark ? Colors.white70 : Colors.deepPurple.shade300;

@@ -116,6 +116,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 24),
+                      _SectionHeader(title: "Legal & Data"),
+                      _SettingsGroup(
+                        children: [
+                          _SettingsTile(
+                            icon: Icons.privacy_tip_outlined,
+                            title: "Privacy Policy",
+                            subtitle: "How we handle your data",
+                            onTap: () => context.push('/privacy-policy'),
+                            showArrow: true,
+                          ),
+                          _SettingsTile(
+                            icon: Icons.delete_forever_rounded,
+                            title: "Delete Account",
+                            subtitle: "Permanently remove all data",
+                            iconColor: Colors.red,
+                            textColor: Colors.red,
+                            onTap: _deleteAccount,
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 40),
                       Center(
                         child: Text(
@@ -298,7 +319,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha: 0.2),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
@@ -311,7 +332,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.deepPurple.withOpacity(0.1),
+                        color: Colors.deepPurple.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -350,7 +371,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         borderRadius: BorderRadius.circular(50),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.deepPurple.withOpacity(0.3),
+                            color: Colors.deepPurple.withValues(alpha: 0.3),
                             blurRadius: 12,
                             offset: const Offset(0, 4),
                           ),
@@ -394,8 +415,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         SliderTheme(
                           data: SliderTheme.of(context).copyWith(
                             activeTrackColor: Colors.deepPurple,
-                            inactiveTrackColor: Colors.deepPurple.withOpacity(
-                              0.1,
+                            inactiveTrackColor: Colors.deepPurple.withValues(
+                              alpha: 0.1,
                             ),
                             trackHeight: 8,
                             thumbColor: Colors.white,
@@ -403,7 +424,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               enabledThumbRadius: 12,
                               elevation: 4,
                             ),
-                            overlayColor: Colors.deepPurple.withOpacity(0.1),
+                            overlayColor: Colors.deepPurple.withValues(
+                              alpha: 0.1,
+                            ),
                           ),
                           child: Slider(
                             value: selectedHours,
@@ -543,6 +566,60 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       }
     }
   }
+
+  // Compliance Helpers
+
+  Future<void> _deleteAccount() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return AlertDialog(
+          backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+          title: const Text(
+            "Delete Account?",
+            style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            "This action is IRREVERSIBLE. All your data, contacts, and settings will be permanently deleted.",
+            style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text("DELETE FOREVER"),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      if (!mounted) return;
+      try {
+        await ref.read(authServiceProvider).deleteAccount();
+        if (mounted) {
+          ToastUtils.showSuccess(context, "Account deleted successfully.");
+          // Navigation usually handled by auth stream logic in GoRouter/main
+        }
+      } catch (e) {
+        if (mounted) {
+          ToastUtils.showError(
+            context,
+            "Failed to delete: ${ErrorParser.parse(e)}. Please sign in again and retry.",
+          );
+        }
+      }
+    }
+  }
 }
 
 class _SectionHeader extends StatelessWidget {
@@ -585,8 +662,8 @@ class _SettingsGroup extends StatelessWidget {
             ? []
             : [
                 BoxShadow(
-                  color: Colors.black.withOpacity(
-                    0.04,
+                  color: Colors.black.withValues(
+                    alpha: 0.04,
                   ), // Subtle shadow for lift
                   blurRadius: 10,
                   offset: const Offset(0, 4),
@@ -649,7 +726,7 @@ class _SettingsTile extends StatelessWidget {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: tileIconColor.withOpacity(0.1),
+          color: tileIconColor.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
         child: Icon(icon, size: 20, color: tileIconColor),
@@ -708,7 +785,7 @@ class _SettingsSwitchTile extends StatelessWidget {
       secondary: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: tileIconColor.withOpacity(0.1),
+          color: tileIconColor.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
         child: Icon(icon, size: 20, color: tileIconColor),
@@ -723,7 +800,7 @@ class _SettingsSwitchTile extends StatelessWidget {
       ),
       value: value,
       onChanged: onChanged,
-      activeColor: activeColor ?? theme.primaryColor,
+      activeTrackColor: activeColor ?? theme.primaryColor,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       tileColor: Colors.transparent,
       applyCupertinoTheme:

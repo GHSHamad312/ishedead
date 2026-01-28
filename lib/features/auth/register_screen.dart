@@ -46,6 +46,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
       // 2. Create User Profile
       if (cred.user != null) {
+        // Send Verification Email
+        await ref.read(authServiceProvider).sendEmailVerification();
+
         final newProfile = UserProfile(
           uid: cred.user!.uid,
           email: _emailController.text.trim(),

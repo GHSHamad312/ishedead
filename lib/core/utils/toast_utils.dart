@@ -123,17 +123,17 @@ class _GlassToastState extends State<_GlassToast>
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: (isDark ? Colors.black : Colors.white).withOpacity(
+                  color: (isDark ? Colors.black : Colors.white).withValues(alpha: 
                     0.7,
                   ),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     width: 1,
                   ),
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -144,7 +144,7 @@ class _GlassToastState extends State<_GlassToast>
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: color.withOpacity(0.2),
+                        color: color.withValues(alpha: 0.2),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(icon, color: color, size: 24),

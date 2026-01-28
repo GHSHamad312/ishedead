@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../services/profile_service.dart';
 import '../models/emergency_contact.dart';
 import '../../auth/auth_provider.dart';
+import 'package:is_he_dead/core/utils/toast_utils.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   final bool isSetupMode;
@@ -142,7 +142,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -164,8 +164,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               boxShadow: [
                 BoxShadow(
                   color: isProtocolExecuted
-                      ? Colors.redAccent.withOpacity(0.2)
-                      : Colors.greenAccent.withOpacity(0.2),
+                      ? Colors.redAccent.withValues(alpha: 0.2)
+                      : Colors.greenAccent.withValues(alpha: 0.2),
                   blurRadius: 20,
                   spreadRadius: 2,
                 ),
@@ -202,8 +202,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
             decoration: BoxDecoration(
               color: isProtocolExecuted
-                  ? Colors.red.withOpacity(0.1)
-                  : Colors.green.withOpacity(0.1),
+                  ? Colors.red.withValues(alpha: 0.1)
+                  : Colors.green.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
@@ -303,7 +303,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isDark ? Colors.white10 : Colors.grey.withOpacity(0.1),
+              color: isDark
+                  ? Colors.white10
+                  : Colors.grey.withValues(alpha: 0.1),
             ),
           ),
           child: Row(
@@ -311,7 +313,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(icon, color: color, size: 24),
@@ -367,7 +369,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             separatorBuilder: (c, i) => const SizedBox(width: 16),
             itemBuilder: (context, index) {
               if (index == contacts.length) {
-                return _buildAddContactCard(isDark, surfaceColor);
+                return _buildAddContactCard(
+                  isDark,
+                  surfaceColor,
+                  contacts.length,
+                );
               }
               final contact = contacts[index];
               return _buildPortraitContactCard(contact, isDark, surfaceColor);
@@ -378,20 +384,32 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildAddContactCard(bool isDark, Color surfaceColor) {
+  Widget _buildAddContactCard(
+    bool isDark,
+    Color surfaceColor,
+    int currentCount,
+  ) {
     return GestureDetector(
-      onTap: () => context.push('/edit-contact'),
+      onTap: () {
+        if (currentCount >= 5) {
+          ToastUtils.showError(
+            context,
+            "You can only add up to 5 trusted contacts.",
+          );
+          return;
+        }
+        context.push('/edit-contact');
+      },
       child: Container(
         width: 140,
         padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
         decoration: BoxDecoration(
-          color: surfaceColor.withOpacity(0.5),
+          color: surfaceColor.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: isDark ? Colors.white24 : Colors.grey.withOpacity(0.4),
+            color: isDark ? Colors.white24 : Colors.grey.withValues(alpha: 0.4),
             width: 2,
-            style: BorderStyle
-                .solid, // Or BorderStyle.none if using dashed path paint, but solid is easier here
+            style: BorderStyle.solid,
           ),
         ),
         child: Column(
@@ -401,7 +419,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isDark ? Colors.white10 : Colors.grey.withOpacity(0.1),
+                color: isDark
+                    ? Colors.white10
+                    : Colors.grey.withValues(alpha: 0.1),
               ),
               child: Icon(
                 Icons.add,
@@ -421,7 +441,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              "Trust Contact",
+              currentCount >= 5 ? "Limit Reached" : "Trust Contact",
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 11,
@@ -449,13 +469,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           color: color,
           borderRadius: BorderRadius.circular(24), // Pill/Stadium shape vibe
           border: Border.all(
-            color: isDark ? Colors.white10 : Colors.grey.withOpacity(0.2),
+            color: isDark ? Colors.white10 : Colors.grey.withValues(alpha: 0.2),
           ),
           boxShadow: isDark
               ? []
               : [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: Colors.black.withValues(alpha: 0.04),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -467,14 +487,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             CircleAvatar(
               radius: 36, // Larger avatar
               backgroundColor: isDark
-                  ? Colors.grey[800]
-                  : Colors.amber.shade50.withOpacity(0.5),
+                  ? Colors.white
+                  : Colors.amber.shade50.withValues(alpha: 0.5),
               child: Text(
                 contact.name.isNotEmpty ? contact.name[0].toUpperCase() : '?',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : Colors.deepPurple,
+                  color: Colors.black,
                 ),
               ),
             ),

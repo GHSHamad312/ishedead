@@ -41,9 +41,6 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>NSContactsUsageDescription</key>
-	<string>This application requires access to your contacts to allow you to select emergency contacts for your safety network.</string>
-
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This application needs access to your photo library to allow you to upload documents to your digital vault.</string>
 	<key>NSCameraUsageDescription</key>
@@ -54,7 +51,6 @@
 	<true/>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>This application needs access to the microphone for video recording verification.</string>
+
 </dict>
 </plist>

@@ -156,7 +156,7 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),
+                      color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
@@ -258,12 +258,14 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
     if (contacts.isNotEmpty) completedTasks++;
 
     // 3. Digital Vault
-    if (profile.willUrl != null && profile.willUrl!.isNotEmpty)
+    if (profile.willUrl != null && profile.willUrl!.isNotEmpty) {
       completedTasks++;
+    }
 
     // 4. Legacy Message
-    if (profile.legacyMessage != null && profile.legacyMessage!.isNotEmpty)
+    if (profile.legacyMessage != null && profile.legacyMessage!.isNotEmpty) {
       completedTasks++;
+    }
 
     // Total steps: 4 (Medical, Contacts, Vault, Legacy)
     double progress = completedTasks / 4.0;
@@ -479,7 +481,7 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isComplete
-              ? Colors.green.withOpacity(0.5)
+              ? Colors.green.withValues(alpha: 0.5)
               : VaultStyles.glassBorderColor(isDark),
           width: 1.5,
         ),
@@ -497,7 +499,7 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.2),
+                    color: color.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(icon, color: color, size: 24),

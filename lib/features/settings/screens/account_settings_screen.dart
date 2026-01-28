@@ -57,15 +57,24 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
     // Remove formatting
     final cleanPhone = phone.replaceAll(RegExp(r'[^\d+]'), '');
 
-    // Iterate through countries to find a match
-    // countries is a List<Map<String, dynamic>> exported by intl_phone_field
+    dynamic bestMatch;
+    int maxLen = 0;
+
+    // Iterate through countries to find the longest dial code match
     for (final country in countries) {
       final dialCode = country.dialCode;
       // Check if phone starts with dial code (allowing for +)
-      if (cleanPhone.startsWith('+${dialCode}') ||
+      if (cleanPhone.startsWith('+$dialCode') ||
           cleanPhone.startsWith(dialCode)) {
-        return country.code;
+        if (dialCode.length > maxLen) {
+          maxLen = dialCode.length;
+          bestMatch = country;
+        }
       }
+    }
+
+    if (bestMatch != null) {
+      return bestMatch.code;
     }
     return 'US'; // Default fallback
   }
@@ -311,6 +320,7 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
                             icon: Icons.person_outline_rounded,
                             isDark: isDark,
                             enabled: _isEditing,
+                            isPassword: false,
                           ),
                           const SizedBox(height: 16),
                           Container(
@@ -367,6 +377,7 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
                             icon: Icons.email_outlined,
                             isDark: isDark,
                             enabled: false,
+                            isPassword: false,
                           ),
                           const SizedBox(height: 16),
                           InkWell(
@@ -496,8 +507,8 @@ class _GlassTextField extends StatelessWidget {
     required this.controller,
     required this.icon,
     required this.label,
+    required this.isPassword,
     required this.isDark,
-    this.isPassword = false,
     this.enabled = true,
   });
 

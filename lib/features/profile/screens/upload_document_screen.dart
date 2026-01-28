@@ -29,9 +29,22 @@ class _UploadDocumentScreenState extends ConsumerState<UploadDocumentScreen> {
     );
 
     if (result != null) {
+      final file = result.files.single;
+
+      // 100 MB Limit (100 * 1024 * 1024 bytes)
+      if (file.size > 100 * 1024 * 1024) {
+        if (mounted) {
+          ToastUtils.showError(
+            context,
+            "File is too large. Max limit is 100MB.",
+          );
+        }
+        return;
+      }
+
       setState(() {
-        _selectedFile = File(result.files.single.path!);
-        _fileName = result.files.single.name;
+        _selectedFile = File(file.path!);
+        _fileName = file.name;
       });
     }
   }
@@ -96,8 +109,9 @@ class _UploadDocumentScreenState extends ConsumerState<UploadDocumentScreen> {
       ),
       body: userProfileAsync.when(
         data: (profile) {
-          if (profile == null)
+          if (profile == null) {
             return const Center(child: Text('Profile Error'));
+          }
 
           final hasExistingFile = profile.willUrl != null;
 
@@ -132,12 +146,12 @@ class _UploadDocumentScreenState extends ConsumerState<UploadDocumentScreen> {
                         color: surfaceColor,
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(
-                          color: Colors.green.withOpacity(0.5),
+                          color: Colors.green.withValues(alpha: 0.5),
                           width: 2,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.green.withOpacity(0.1),
+                            color: Colors.green.withValues(alpha: 0.1),
                             blurRadius: 20,
                             offset: const Offset(0, 8),
                           ),
@@ -148,7 +162,7 @@ class _UploadDocumentScreenState extends ConsumerState<UploadDocumentScreen> {
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: Colors.green.withOpacity(0.1),
+                              color: Colors.green.withValues(alpha: 0.1),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
@@ -217,13 +231,13 @@ class _UploadDocumentScreenState extends ConsumerState<UploadDocumentScreen> {
                         height: 250,
                         decoration: BoxDecoration(
                           color: isDark
-                              ? Colors.white.withOpacity(0.05)
-                              : Colors.deepPurple.withOpacity(0.05),
+                              ? Colors.white.withValues(alpha: 0.05)
+                              : Colors.deepPurple.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: isDark
                                 ? Colors.white24
-                                : Colors.deepPurple.withOpacity(0.3),
+                                : Colors.deepPurple.withValues(alpha: 0.3),
                             width: 2,
                             style: BorderStyle.solid,
                           ),
@@ -238,8 +252,8 @@ class _UploadDocumentScreenState extends ConsumerState<UploadDocumentScreen> {
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(
-                                      isDark ? 0.3 : 0.05,
+                                    color: Colors.black.withValues(
+                                      alpha: isDark ? 0.3 : 0.05,
                                     ),
                                     blurRadius: 10,
                                     offset: const Offset(0, 5),
@@ -271,7 +285,7 @@ class _UploadDocumentScreenState extends ConsumerState<UploadDocumentScreen> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              _fileName ?? "Supports PDF, JPG, PNG",
+                              _fileName ?? "Supports PDF, JPG, PNG (Max 100MB)",
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 14,
@@ -291,9 +305,11 @@ class _UploadDocumentScreenState extends ConsumerState<UploadDocumentScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.amber.withOpacity(0.1),
+                      color: Colors.amber.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.amber.withOpacity(0.5)),
+                      border: Border.all(
+                        color: Colors.amber.withValues(alpha: 0.5),
+                      ),
                     ),
                     child: Row(
                       children: [

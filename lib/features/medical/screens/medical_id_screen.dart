@@ -292,7 +292,7 @@ class _MedicalIdScreenState extends ConsumerState<MedicalIdScreen> {
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFFF5252).withOpacity(0.4),
+                  color: const Color(0xFFFF5252).withValues(alpha: 0.4),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -327,7 +327,7 @@ class _MedicalIdScreenState extends ConsumerState<MedicalIdScreen> {
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Text(
@@ -351,7 +351,7 @@ class _MedicalIdScreenState extends ConsumerState<MedicalIdScreen> {
                       Text(
                         "BLOOD TYPE",
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
+                          color: Colors.white.withValues(alpha: 0.7),
                           fontSize: 12,
                           letterSpacing: 1.5,
                           fontWeight: FontWeight.w500,
@@ -425,7 +425,7 @@ class _MedicalIdScreenState extends ConsumerState<MedicalIdScreen> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -468,7 +468,7 @@ class _MedicalIdScreenState extends ConsumerState<MedicalIdScreen> {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: isDark ? iconColor.withOpacity(0.2) : chipBg,
+                    color: isDark ? iconColor.withValues(alpha: 0.2) : chipBg,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -496,7 +496,7 @@ class _MedicalIdScreenState extends ConsumerState<MedicalIdScreen> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -596,7 +596,7 @@ class _MedicalIdScreenState extends ConsumerState<MedicalIdScreen> {
       ),
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       child: DropdownButtonFormField<String>(
-        value: options.contains(controller.text) ? controller.text : null,
+        initialValue: options.contains(controller.text) ? controller.text : null,
         items: options.map((String value) {
           return DropdownMenuItem<String>(value: value, child: Text(value));
         }).toList(),

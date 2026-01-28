@@ -291,7 +291,7 @@ exports.sendCall = async (contact, user) => {
         }
 
         await twilioClient.calls.create({
-            twiml: `<Response><Say>This is an automated emergency alert from the Is He Dead application. User ${user.full_name || user.email} has not checked in for 4 days. Please perform a wellness check immediately.</Say></Response>`,
+            twiml: `<Response><Say>This is an automated emergency alert from the Is He Dead application. User ${user.full_name || user.email} has not checked in for the critical safety duration. Please perform a wellness check immediately.</Say></Response>`,
             to: contact.phone,
             from: config.twilio.from
         });

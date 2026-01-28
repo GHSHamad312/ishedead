@@ -150,7 +150,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
                     CircleAvatar(
                       radius: 40,
                       backgroundColor: isDark
-                          ? Colors.deepPurple.withOpacity(0.2)
+                          ? Colors.deepPurple.withValues(alpha: 0.2)
                           : Colors.deepPurple.shade50,
                       child: Icon(
                         widget.contact == null
@@ -181,7 +181,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
+                      color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
@@ -252,7 +252,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
+                      color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
@@ -486,12 +486,12 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
     return SwitchListTile(
       value: value,
       onChanged: onChanged,
-      activeColor: isDark ? Colors.deepPurpleAccent : Colors.deepPurple,
+      activeThumbColor: isDark ? Colors.deepPurpleAccent : Colors.deepPurple,
       secondary: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: isDark
-              ? Colors.deepPurple.withOpacity(0.2)
+              ? Colors.deepPurple.withValues(alpha: 0.2)
               : Colors.deepPurple.shade50,
           shape: BoxShape.circle,
         ),

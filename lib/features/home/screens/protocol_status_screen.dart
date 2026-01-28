@@ -78,16 +78,16 @@ class ProtocolStatusScreen extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
                       color: isProtocolExecuted
-                          ? Colors.redAccent.withOpacity(0.5)
+                          ? Colors.redAccent.withValues(alpha: 0.5)
                           : (isDark
-                                ? Colors.deepPurpleAccent.withOpacity(0.3)
-                                : Colors.deepPurple.withOpacity(0.1)),
+                                ? Colors.deepPurpleAccent.withValues(alpha: 0.3)
+                                : Colors.deepPurple.withValues(alpha: 0.1)),
                     ),
                     boxShadow: [
                       BoxShadow(
                         color: isProtocolExecuted
-                            ? Colors.red.withOpacity(0.2)
-                            : Colors.deepPurple.withOpacity(0.1),
+                            ? Colors.red.withValues(alpha: 0.2)
+                            : Colors.deepPurple.withValues(alpha: 0.1),
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),
@@ -255,7 +255,7 @@ class ProtocolStatusScreen extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                   border: Border.all(color: color, width: 2),
                 ),
@@ -371,7 +371,7 @@ class ProtocolStatusScreen extends ConsumerWidget {
             ? []
             : [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.05),
+                  color: Colors.grey.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -437,7 +437,7 @@ class ProtocolStatusScreen extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 2),
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
+        color: color.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
