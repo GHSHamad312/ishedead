@@ -18,11 +18,6 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final themeMode = ref.watch(themeProvider);
     final user = ref.watch(authServiceProvider).currentUser;

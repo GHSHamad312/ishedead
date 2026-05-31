@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'dart:io';
-import 'dart:ui' as android;
+import 'dart:ui' as ui;
 
 final notificationServiceProvider = Provider<NotificationService>((ref) {
   return NotificationService();
@@ -116,7 +116,7 @@ class NotificationService {
           importance: Importance.max,
           priority: Priority.high,
           fullScreenIntent: true,
-          color: android.Color(0xFFFF0000),
+          color: ui.Color(0xFFFF0000),
           playSound: true,
         ),
         iOS: DarwinNotificationDetails(

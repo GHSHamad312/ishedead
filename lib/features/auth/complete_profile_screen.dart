@@ -193,7 +193,6 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
                         validator: (v) => v!.isEmpty ? 'Required' : null,
                       ),
                       const SizedBox(height: 16),
-                      const SizedBox(height: 16),
                       GlassPhoneField(
                         label: 'Phone Number',
                         isDark: isDark,

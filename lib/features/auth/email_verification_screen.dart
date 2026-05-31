@@ -122,7 +122,7 @@ class _EmailVerificationScreenState
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.deepPurpleAccent.withOpacity(0.1),
+                    color: Colors.deepPurpleAccent.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -207,7 +207,7 @@ class _EmailVerificationScreenState
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: const [
+                    children: [
                       Icon(Icons.logout, size: 20),
                       SizedBox(width: 8),
                       Text("Sign Out"),

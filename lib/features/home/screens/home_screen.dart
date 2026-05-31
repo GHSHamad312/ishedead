@@ -83,8 +83,6 @@ class _HomePageState extends ConsumerState<HomePage>
             children: [
               const SizedBox(height: 20),
               // Status Indicator
-              // Status Indicator
-              // Status Indicator
               if (userProfileAsync.value != null) ...[
                 Builder(
                   builder: (context) {

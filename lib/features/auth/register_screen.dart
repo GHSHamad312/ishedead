@@ -309,8 +309,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
 // Sharing the same widget logic, duplicated here to be self-contained within file.
 // In a larger refactor, this should move to a shared widgets folder.
-// Sharing the same widget logic, duplicated here to be self-contained within file.
-// In a larger refactor, this should move to a shared widgets folder.
 class _GlassTextField extends StatelessWidget {
   final TextEditingController controller;
   final IconData icon;
