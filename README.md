@@ -185,16 +185,6 @@ A **Cloud Function** runs every 60 minutes to check all active users and escalat
 
 ## 📱 Screenshots
 
-> Add your own screenshots here! Replace the placeholders below.
-
-<p align="center">
-  <img src="assets/images/onboarding_1.png" width="200" alt="Onboarding"/>
-  &nbsp;&nbsp;
-  <img src="assets/images/onboarding_2.png" width="200" alt="Onboarding 2"/>
-  &nbsp;&nbsp;
-  <img src="assets/images/auth_header.png" width="200" alt="Auth"/>
-</p>
-
 <!-- 
 Add more screenshots:
 <p align="center">
@@ -350,13 +340,3 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 - [GoRouter](https://pub.dev/packages/go_router) — Declarative routing
 - [Twilio](https://www.twilio.com/) — SMS & Voice APIs
 - [Nodemailer](https://nodemailer.com/) — Email delivery
-
----
-
-<p align="center">
-  <strong>Built with ❤️ and a healthy dose of existential awareness</strong>
-</p>
-
-<p align="center">
-  <em>"The best time to prepare was yesterday. The second best time is now."</em>
-</p>
